@@ -5,8 +5,29 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1793001044876,
-      "tag": "0000_square_cloak",
+      "when": 1793022887533,
+      "tag": "0000_strong_wallop",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793022978108,
+      "tag": "0001_hot_ted_forrester",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793187182444,
+      "tag": "0002_foamy_hannibal_king",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793189019592,
+      "tag": "0003_wild_banshee",
       "breakpoints": true
     }
   ]

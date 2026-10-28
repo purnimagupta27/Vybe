@@ -1,20 +1,34 @@
-import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp, boolean, index } from "drizzle-orm/pg-core";
+import { relations, sql } from "drizzle-orm";
+import { pgTable, text, timestamp, boolean, index, integer, pgEnum, varchar, check } from "drizzle-orm/pg-core";
+
+export const genderEnum = pgEnum("gender", [
+  "male",
+  "female",
+  "others",
+]);
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
-  name: text("name").notNull(),
+  name: varchar("name", { length: 50 }).notNull(),
   // firstName: text("first_name").notNull(),
   lastName: text("last_name"),
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
-  image: text("image"),
+  image: text("image").default("https://in.pinterest.com/pin/916341855432288019/"),
+  gender: genderEnum("gender"),
+  age: integer("age"),
+  about: text("about"),
+  favSingers: text("fav_singers").array(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
-});
+}, (table) => [
+  check("user_name_length_check", sql`char_length(${table.name}) >= 4`),
+  check("user_age_min_check", sql`${table.age} >= 18`),
+  check("user_fav_singers_max_check", sql`array_length(${table.favSingers}, 1) <= 30`),
+]);
 
 export const session = pgTable(
   "session",
