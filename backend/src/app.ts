@@ -1,15 +1,22 @@
-import express, {type Request, type Response} from 'express'
+import express from 'express'
 import 'dotenv/config'
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth.js"
+import profileRouter from "./routes/profile.routes.js"
+import requestRouter from './routes/request.routes.js';
+import { requireAuth } from './middleware/auth.middleware.js';
 
 
 const app = express()
 const PORT = process.env.PORT ?? 4000
 
-app.use(express.json())
-
 app.all("/api/auth/*splat", toNodeHandler(auth))
+
+app.use(express.json())
+app.use("/api/profile", requireAuth, profileRouter)
+app.use("/api/request", requireAuth, requestRouter)
+
+
 
 app.get("/oauth-test", (_req, res) => {
   res.type("html").send(`
@@ -44,10 +51,5 @@ app.get("/oauth-test", (_req, res) => {
     </script>
   `);
 });
-
-app.get('/', (req: Request, res: Response) => {
-    console.log("Hello")
-    return res.json({message: "Success"})
-})
 
 app.listen(PORT, () => console.log("Server is running"))
