@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const connectionStatusValues = ["ignored", "interested", "accepted", "rejected"] as const;
+export const connectionStatusValues = ["ignored", "interested"] as const;
 
 export const connectionStatusSchema = z.enum(connectionStatusValues, {
   error: (issue) =>

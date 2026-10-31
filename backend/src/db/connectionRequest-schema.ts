@@ -5,9 +5,7 @@ import { user } from "./auth-schema.js";
 // All possible states of a connection request.
 export const connectionStatusEnum = pgEnum("connection_status", [
   "ignored",
-  "interested",
-  "accepted",
-  "rejected",
+  "interested"
 ]);
 
 export const connectionRequest = pgTable(
