@@ -3,9 +3,13 @@ import { pgTable, text, timestamp, index, pgEnum, unique, check } from "drizzle-
 import { user } from "./auth-schema.js";
 
 // All possible states of a connection request.
+// - "ignored" / "interested": set by the SENDER via the send API.
+// - "accepted" / "rejected": set by the RECEIVER via the review API.
 export const connectionStatusEnum = pgEnum("connection_status", [
   "ignored",
-  "interested"
+  "interested",
+  "accepted",
+  "rejected"
 ]);
 
 export const connectionRequest = pgTable(
