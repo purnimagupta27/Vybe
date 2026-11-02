@@ -70,4 +70,77 @@ userRouter.get("/requests/received", async (req: Request, res: Response) => {
 })
 
 
+
+// GET /api/user/connections
+// Returns the users the logged-in user is CONNECTED with — i.e. rows whose
+// status is "accepted" — regardless of who sent the request (either direction).
+// Only the OTHER user's details are returned, never the connection row details.
+userRouter.get("/connections", async (req: Request, res: Response) => {
+  try {
+    const loggedInUserId = req.user?.id
+
+    if (!loggedInUserId) {
+      return res.status(401).json({ message: "Unauthorized" })
+    }
+
+    const connectionFields = {
+      id: user.id,
+      name: user.name,
+      lastName: user.lastName,
+      image: user.image,
+      gender: user.gender,
+      age: user.age,
+      about: user.about,
+      favSingers: user.favSingers,
+    }
+
+    // Accepted requests the logged-in user SENT — the other party is to_user_id.
+    const iSent = await db
+      .select(connectionFields)
+      .from(connectionRequest)
+      .innerJoin(user, eq(user.id, connectionRequest.toUserId))
+      .where(
+        and(
+          eq(connectionRequest.fromUserId, loggedInUserId),
+          eq(connectionRequest.status, "accepted"),
+        ),
+      )
+
+    // Accepted requests the logged-in user RECEIVED — the other party is from_user_id.
+    const iReceived = await db
+      .select(connectionFields)
+      .from(connectionRequest)
+      .innerJoin(user, eq(user.id, connectionRequest.fromUserId))
+      .where(
+        and(
+          eq(connectionRequest.toUserId, loggedInUserId),
+          eq(connectionRequest.status, "accepted"),
+        ),
+      )
+
+    // A pair can only ever have one request row (unique constraint), so the
+    // merged list cannot contain duplicates. Sorted alphabetically for a stable UI.
+    const connections = [...iSent, ...iReceived]
+      .map((connection) => ({
+        ...connection,
+        favSingers: connection.favSingers ?? [],
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name))
+
+    return res.status(200).json({
+      status: "success",
+      message: "Connections fetched successfully",
+      data: connections,
+    })
+  }
+  catch (error) {
+    console.error("Get connections error:", error)
+    return res.status(500).json({
+      status: "error",
+      message:
+        "Something went wrong while fetching connections. Please try again.",
+    })
+  }
+})
+
 export default userRouter
