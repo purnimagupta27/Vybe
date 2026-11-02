@@ -5,6 +5,7 @@ import { auth } from "./lib/auth.js"
 import profileRouter from "./routes/profile.routes.js"
 import requestRouter from './routes/request.routes.js';
 import { requireAuth } from './middleware/auth.middleware.js';
+import userRouter from './routes/user.routes.js';
 
 
 const app = express()
@@ -15,6 +16,7 @@ app.all("/api/auth/*splat", toNodeHandler(auth))
 app.use(express.json())
 app.use("/api/profile", requireAuth, profileRouter)
 app.use("/api/request", requireAuth, requestRouter)
+app.use("/api/user", requireAuth, userRouter)
 
 
 
