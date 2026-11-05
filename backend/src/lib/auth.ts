@@ -69,6 +69,13 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
+  /* Origins allowed to hit /api/auth cross-origin (Vite dev server) —
+     without this the browser blocks the sign-in fetch with CORS. */
+  trustedOrigins: [
+    "http://localhost:5174",
+    "http://localhost:5173",
+    "http://localhost:3000",
+  ],
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID!,

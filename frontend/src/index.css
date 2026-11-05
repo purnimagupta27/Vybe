@@ -1,0 +1,194 @@
+@import "tailwindcss";
+
+@theme {
+  --color-vybe-950: #080b0b;
+  --color-vybe-900: #241c33;
+  --color-vybe-850: #2c2340;
+  --color-vybe-800: #352a4d;
+  --color-vybe-700: #453762;
+  --color-vybe-600: #5a4a7e;
+  --color-vybe-500: #6f5a9b;
+  --color-vybe-400: #8e7bc0;
+  --color-vybe-300: #b3a3d9;
+  --color-vybe-200: #d4c9ee;
+  --color-vybe-accent: #8b5cf6;
+  --color-vybe-gold: #b3ab80;
+
+  /* Global face — Raleway for every text (heading included) */
+  --font-sans: "Raleway", "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* Hero heading token follows the font-heading utility class */
+  --font-heading: "Raleway", "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* --font-display: "Playfair Display", Georgia, serif; */
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+/* Zound-style backdrop: near-black plum base with violet/magenta glows */
+.hero-backdrop {
+  background-color: #050306;
+  background-image:
+    radial-gradient(ellipse 60% 70% at 12% 75%, rgba(74, 13, 32, 0.7), transparent 72%),
+    radial-gradient(ellipse 55% 65% at 88% 25%, rgba(109, 28, 94, 0.6), transparent 72%),
+    radial-gradient(ellipse 40% 40% at 55% 55%, rgba(71, 61, 67, 0.35), transparent 75%);
+}
+
+/* ---------- Hero entrance (first-load motion) ---------- */
+
+:root {
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes sleeve-settle {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--r)) translateY(-4%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(var(--r));
+  }
+}
+
+@keyframes card-land {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gentle-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* backwards fill: hidden during delay, transform released to hover after settling */
+.sleeve-enter {
+  animation: sleeve-settle 700ms var(--ease-out-strong) backwards;
+}
+.card-land {
+  animation: card-land 450ms var(--ease-out-strong) backwards;
+}
+.rise-in {
+  animation: rise-in 500ms var(--ease-out-strong) backwards;
+}
+
+@keyframes sleeve-float-a {
+  from {
+    transform: translate(0.1cqw, 0.2cqw) rotate(0.25deg);
+  }
+  to {
+    transform: translate(-0.1cqw, -0.2cqw) rotate(-0.25deg);
+  }
+}
+
+@keyframes sleeve-float-b {
+  from {
+    transform: translate(-0.15cqw, -0.1cqw) rotate(-0.2deg);
+  }
+  to {
+    transform: translate(0.15cqw, 0.1cqw) rotate(0.3deg);
+  }
+}
+
+@keyframes figure-rise {
+  from {
+    opacity: 0;
+    transform: translateY(4%) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes figure-drift {
+  from {
+    transform: translateY(0.6%) rotate(0.3deg);
+  }
+  to {
+    transform: translateY(-0.6%) rotate(-0.3deg);
+  }
+}
+
+/* Alt-hero figure: one-shot rise on the outer wrapper, ambient drift nested inside */
+.figure-in {
+  animation: figure-rise 900ms var(--ease-out-strong) 200ms backwards;
+}
+
+/* Blend the HD cutout into the backdrop: slightly dimmed/desaturated,
+   with a radial mask feather centered on her face so head + headphones
+   stay crisp while her outer edges melt into the near-black background. */
+.girl-soft {
+  filter: brightness(0.87) contrast(0.92) saturate(0.82);
+  mask-image: radial-gradient(
+    ellipse 75% 85% at 58% 36%,
+    #000 58%,
+    rgba(0, 0, 0, 0.5) 83%,
+    transparent 98%
+  );
+}
+
+.figure-drift {
+  animation: figure-drift 9s ease-in-out -4s infinite alternate;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .figure-in {
+    animation-name: gentle-fade;
+    animation-duration: 250ms;
+    animation-delay: 0ms !important;
+  }
+
+  .figure-drift {
+    animation-name: none;
+  }
+}
+
+/* Idle drift: lives on an inner wrapper so it never fights the hover lift
+   (hover transform) or the entrance (one-shot animation) on the tile itself. */
+.sleeve-float {
+  animation-name: var(--float-name, sleeve-float-a);
+  animation-duration: var(--float-dur, 9s);
+  animation-delay: var(--float-delay, -3s);
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  animation-timing-function: ease-in-out;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sleeve-enter,
+  .card-land,
+  .rise-in {
+    animation-name: gentle-fade;
+    animation-duration: 250ms;
+    animation-delay: 0ms !important;
+  }
+
+  .sleeve-float {
+    animation-name: none;
+  }
+}
