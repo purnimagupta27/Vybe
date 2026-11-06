@@ -10,7 +10,7 @@ export default function HeroAlt() {
   return (
     <section className="hero-backdrop relative isolate flex min-h-[calc(100vh-4rem)] flex-col overflow-hidden">
       {/* Navbar variant — logo left, centre links, outline pill right */}
-      <nav className="relative z-20 flex h-16 items-center justify-between border-b border-white/10 px-6 sm:px-10">
+      <nav className="relative z-20 mt-3 sm:mt-4 flex h-16 items-center justify-between px-6 sm:px-10">
         <a href="/" className="group flex select-none items-center gap-2">
           <AudioLines
             className="h-7 w-7 text-vybe-gold transition-transform duration-300 group-hover:scale-110"

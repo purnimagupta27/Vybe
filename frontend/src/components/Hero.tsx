@@ -1,5 +1,6 @@
 import { AudioLines } from "lucide-react";
 import girl from "../assets/girl-headphones.png";
+import HeroAmbient from "./HeroAmbient";
 
 /* Primary hero — Zound backdrop, beats-icon heading lockup, girl cutout
    anchored bottom-right over a palette glow ring. The navbar is a separate
@@ -24,10 +25,14 @@ export default function Hero() {
           }}
         />
 
+        {/* Ambient field — hairline ripples, orbit arcs, rising motes. Sits
+            above the glow but under the figure (z-10) and copy (z-20). */}
+        <HeroAmbient />
+
         {/* Heading — large AudioLines icon left of the two-line heading,
-            centred in the stage */}
+            centred in the stage; supporting copy sits directly below it */}
         <div
-          className="rise-in relative z-20 px-8 pb-24 sm:px-14 md:pb-0"
+          className="rise-in relative z-20 px-8 sm:px-14"
           style={{ animationDelay: "520ms" }}
         >
           <div className="flex items-center gap-9 sm:gap-16">
@@ -49,17 +54,25 @@ export default function Hero() {
               </h1>
             </div>
           </div>
-        </div>
 
-        {/* Supporting copy — the mock's bottom-left paragraph slot, absolutely
-            placed so the heading lockup above is untouched */}
-        <p
-          className="rise-in absolute bottom-[13%] left-6 z-20 max-w-md text-[clamp(0.85rem,1.1vw,1.05rem)] font-normal leading-relaxed text-white/80 sm:left-10"
-          style={{ animationDelay: "680ms" }}
-        >
-          Connect with people who feel your music, understand your vibe, and
-          share your rhythm.
-        </p>
+          {/* Supporting copy — sits in normal flow just below the heading and
+              stays aligned with the heading text; from xl up it holds three
+              set lines within the heading's column. */}
+          <p
+            className="mt-6 max-w-lg text-[clamp(0.85rem,1.1vw,1.05rem)] font-normal leading-relaxed text-white/80 sm:mt-7 sm:pl-[144px] lg:pl-[160px] xl:max-w-[48rem] xl:text-[clamp(0.8rem,1.02vw,0.95rem)]"
+            style={{
+              textShadow:
+                "0 1px 2px rgba(5, 3, 8, 0.9), 0 6px 24px rgba(5, 3, 8, 0.85)",
+            }}
+          >
+            Connect with people who feel your music, understand your vibe{" "}
+            <br className="hidden xl:inline" />
+            and share your rhythm. Explore
+            shared interests and find {" "}
+            <br className="hidden xl:inline" />
+            people who make every beat feel enjoyable.
+          </p>
+        </div>
 
         {/* Girl — entrance on the wrapper, ambient drift nested inside so the
             two never fight; girl-soft dims + masks her so the HD cutout

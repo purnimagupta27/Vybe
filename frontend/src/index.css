@@ -36,6 +36,25 @@ body {
     radial-gradient(ellipse 40% 40% at 55% 55%, rgba(71, 61, 67, 0.35), transparent 75%);
 }
 
+/* Ambient hero field — feather the canvas out at the top and bottom edges
+   so the ripples never end on a hard line. */
+.hero-ambient {
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 8%,
+    #000 70%,
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 8%,
+    #000 70%,
+    transparent
+  );
+}
+
 /* ---------- Hero entrance (first-load motion) ---------- */
 
 :root {
