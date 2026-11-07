@@ -3,6 +3,7 @@ import { APIError } from "better-auth/api";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import db from "../index.js";
 import * as authSchema from "../db/auth-schema.js";
+import { trustedOrigins } from "./origins.js";
 import "dotenv/config";
 
 const validateUserFields = (data: {
@@ -30,6 +31,9 @@ const validateUserFields = (data: {
 };
 
 export const auth = betterAuth({
+  /* Public origin of this API. Better Auth uses it to build the OAuth
+     redirect URI: <baseURL>/api/auth/callback/google */
+  baseURL: process.env.BETTER_AUTH_URL,
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: authSchema,
@@ -69,13 +73,18 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
+  /* Google verifies the email address, so an existing email/password user
+     who later signs in with Google is linked to the same account instead of
+     hitting "account not linked". */
+  account: {
+    accountLinking: {
+      enabled: true,
+      trustedProviders: ["google"],
+    },
+  },
   /* Origins allowed to hit /api/auth cross-origin (Vite dev server) —
      without this the browser blocks the sign-in fetch with CORS. */
-  trustedOrigins: [
-    "http://localhost:5174",
-    "http://localhost:5173",
-    "http://localhost:3000",
-  ],
+  trustedOrigins,
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID!,

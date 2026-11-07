@@ -1,7 +1,9 @@
 import express from 'express'
+import cors from 'cors'
 import 'dotenv/config'
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth.js"
+import { trustedOrigins } from "./lib/origins.js"
 import profileRouter from "./routes/profile.routes.js"
 import requestRouter from './routes/request.routes.js';
 import { requireAuth } from './middleware/auth.middleware.js';
@@ -10,6 +12,23 @@ import userRouter from './routes/user.routes.js';
 
 const app = express()
 const PORT = process.env.PORT ?? 4000
+
+/* The Vite dev server (5173/5174) is a different origin from the API
+   (4000), so the browser needs CORS — including the OPTIONS preflight —
+   or it blocks the social sign-in request before it reaches Google.
+   Must be registered before the auth handler. */
+app.use(cors({
+  origin: (origin, callback) => {
+    // Requests without an Origin header (curl, server-to-server, same-origin) pass through.
+    if (!origin || trustedOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+    callback(new Error(`Origin ${origin} is not allowed by CORS`));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+}));
 
 app.all("/api/auth/*splat", toNodeHandler(auth))
 
