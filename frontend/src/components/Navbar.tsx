@@ -32,8 +32,8 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="relative z-20 flex h-16 items-center justify-between px-6 sm:px-10">
-      <a href="/" className="group flex select-none items-center gap-2">
+    <nav className="relative z-20 flex h-16 translate-y-2 items-center justify-between px-6 sm:px-10">
+      <a href="/" className="group ml-2 flex select-none items-center gap-2 sm:ml-4">
         <AudioLines
           className="h-7 w-7 text-vybe-gold transition-transform duration-300 group-hover:scale-110"
           strokeWidth={2.5}
@@ -43,7 +43,7 @@ export default function Navbar() {
         </span>
       </a>
 
-      <div className="flex flex-col items-end gap-1">
+      <div className="mr-2 flex flex-col items-end gap-1 sm:mr-8">
         {user ? (
           <a
             href="/feed"
@@ -58,7 +58,7 @@ export default function Navbar() {
             disabled={signingIn}
             className=" cursor-pointer rounded-full border border-white/25 px-6 py-2 text-sm font-medium text-white/90 transition-[background-color,border-color] duration-200 hover:border-white/40 hover:bg-white/10 disabled:cursor-wait disabled:opacity-60"
           >
-            {signingIn ? "Redirecting…" : "Join Now"}
+            {signingIn ? "Redirecting..." : "Join now"}
           </button>
         )}
         {error && (
