@@ -7,12 +7,13 @@ import {
   type PanInfo,
 } from "motion/react";
 import type { FeedUser, SwipeStatus } from "../../lib/api";
+import { MapPin } from "lucide-react";
 
 /* Horizontal px (or px/s flick) past which a drag commits the swipe */
-const COMMIT_DISTANCE = 120;
-const COMMIT_VELOCITY = 800;
+const COMMIT_DISTANCE = 110;
+const COMMIT_VELOCITY = 700;
 /* Where the card flies to when leaving the stack */
-const EXIT_X = 600;
+const EXIT_X = 550;
 
 type SwipeCardProps = {
   user: FeedUser;
@@ -44,26 +45,18 @@ export default function SwipeCard({
   const controls = useAnimationControls();
   const exitingRef = useRef(false);
 
-  const rotate = useTransform(x, [-300, 300], [-14, 14]);
-  const interestedOpacity = useTransform(
-    x,
-    [-COMMIT_DISTANCE, -20, 20, COMMIT_DISTANCE],
-    [0, 0, 0.15, 1],
-  );
-  const ignoredOpacity = useTransform(
-    x,
-    [-COMMIT_DISTANCE, -20, 20, COMMIT_DISTANCE],
-    [1, 0.15, 0, 0],
-  );
+  const rotate = useTransform(x, [-300, 300], [-10, 10]);
+  const interestedOpacity = useTransform(x, [15, COMMIT_DISTANCE], [0, 1]);
+  const ignoredOpacity = useTransform(x, [-COMMIT_DISTANCE, -15], [1, 0]);
 
   const flyAway = (status: SwipeStatus) => {
     const direction = status === "interested" ? 1 : -1;
     controls
       .start({
         x: direction * EXIT_X,
-        rotate: direction * 18,
+        rotate: direction * 14,
         opacity: 0,
-        transition: { duration: 0.3, ease: "easeOut" },
+        transition: { duration: 0.28, ease: "easeOut" },
       })
       .then(() => {
         onExited(status);
@@ -105,9 +98,9 @@ export default function SwipeCard({
     return (
       <div
         aria-hidden
-        className="absolute inset-x-0 mx-auto h-[520px] max-w-sm rounded-3xl border border-white/10 bg-vybe-850/60"
+        className="absolute inset-x-0 mx-auto h-[530px] max-w-sm rounded-2xl border border-white/[0.06] bg-[#110e17]/90 shadow-xl"
         style={{
-          transform: `translateY(${index * -12}px) scale(${1 - index * 0.04})`,
+          transform: `translateY(${index * -10}px) scale(${1 - index * 0.04})`,
         }}
       />
     );
@@ -121,76 +114,101 @@ export default function SwipeCard({
       animate={controls}
       onDragEnd={handleDragEnd}
       whileDrag={{ cursor: "grabbing" }}
-      className="absolute inset-x-0 mx-auto max-w-sm cursor-grab touch-pan-y select-none overflow-hidden rounded-3xl border border-white/10 bg-vybe-850/80 shadow-2xl shadow-black/50 backdrop-blur-md"
+      className="absolute inset-x-0 mx-auto flex h-[530px] max-w-sm cursor-grab touch-pan-y select-none flex-col justify-between overflow-hidden rounded-2xl border border-white/[0.08] bg-[#110e17] shadow-2xl shadow-black/70"
     >
-      {/* Direction stamps, revealed by drag progress */}
-      <motion.span
+      {/* Simple, understated swipe indicator badges */}
+      <motion.div
         style={{ opacity: interestedOpacity }}
-        className="pointer-events-none absolute top-5 left-5 z-10 rotate-[-12deg] rounded-lg border-2 border-emerald-400/60 px-3 py-1 font-heading text-lg font-bold tracking-widest text-emerald-300"
+        className="pointer-events-none absolute top-4 right-4 z-20 rounded-full border border-emerald-500/40 bg-emerald-500/15 px-3 py-1 text-xs font-semibold tracking-wider text-emerald-300 backdrop-blur-md"
       >
-        INTERESTED
-      </motion.span>
-      <motion.span
+        LIKE
+      </motion.div>
+      <motion.div
         style={{ opacity: ignoredOpacity }}
-        className="pointer-events-none absolute top-5 right-5 z-10 rotate-[12deg] rounded-lg border-2 border-rose-400/60 px-3 py-1 font-heading text-lg font-bold tracking-widest text-rose-300"
+        className="pointer-events-none absolute top-4 left-4 z-20 rounded-full border border-rose-500/40 bg-rose-500/15 px-3 py-1 text-xs font-semibold tracking-wider text-rose-300 backdrop-blur-md"
       >
-        IGNORED
-      </motion.span>
+        PASS
+      </motion.div>
 
-      {user.image ? (
-        <img
-          src={user.image}
-          alt={`${user.name}'s profile`}
-          draggable={false}
-          className="h-64 w-full object-cover"
-        />
-      ) : (
-        <div className="flex h-64 w-full items-center justify-center bg-vybe-800/80">
-          <span className="font-heading text-5xl font-semibold text-vybe-300">
-            {initials(user.name)}
-          </span>
-        </div>
-      )}
-
-      <div className="space-y-3 p-5">
-        <div className="flex items-center gap-3">
-          <h3 className="font-heading text-2xl font-semibold text-white/90">
-            {user.name}
-            {user.lastName ? ` ${user.lastName}` : ""}
-          </h3>
-          {user.age !== null && (
-            <span className="rounded-full border border-white/15 px-2.5 py-0.5 text-sm text-white/70">
-              {user.age}
-            </span>
-          )}
-          {user.gender && (
-            <span className="rounded-full border border-vybe-accent/40 px-2.5 py-0.5 text-sm capitalize text-vybe-300">
-              {user.gender}
-            </span>
-          )}
-        </div>
-
-        {user.about && (
-          <p className="line-clamp-3 text-sm leading-relaxed text-white/70">
-            {user.about}
-          </p>
+      {/* Top Media / Photo Section */}
+      <div className="relative h-[290px] w-full shrink-0 overflow-hidden bg-white/[0.02]">
+        {user.image ? (
+          <img
+            src={user.image}
+            alt={user.name}
+            draggable={false}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-b from-white/[0.04] to-transparent">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full border border-white/10 bg-white/[0.03]">
+              <span className="font-heading text-2xl font-bold text-white/50">
+                {initials(user.name)}
+              </span>
+            </div>
+          </div>
         )}
+        {/* Soft bottom gradient fade into card body */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#110e17] to-transparent" />
+      </div>
 
-        {user.favSingers.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {user.favSingers.slice(0, 8).map((singer) => (
-              <span
-                key={singer}
-                className="rounded-full bg-white/10 px-2.5 py-0.5 text-xs text-white/80"
-              >
-                {singer}
-              </span>
-            ))}
-            {user.favSingers.length > 8 && (
-              <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-xs text-white/50">
-                +{user.favSingers.length - 8} more
-              </span>
+      {/* Card Content Section */}
+      <div className="flex flex-1 flex-col justify-between p-5 pt-1">
+        <div className="space-y-2">
+          {/* Name, Age & Gender */}
+          <div>
+            <div className="flex items-baseline gap-2">
+              <h3 className="font-heading text-2xl font-bold text-white">
+                {user.name}
+                {user.lastName ? ` ${user.lastName}` : ""}
+              </h3>
+              {user.age !== null && (
+                <span className="text-xl text-white/50">{user.age}</span>
+              )}
+            </div>
+            {(user.city || user.gender) && (
+              <p className="mt-0.5 flex items-center gap-1.5 text-xs capitalize text-white/40">
+                {user.city && (
+                  <span className="flex min-w-0 items-center gap-1">
+                    <MapPin size={12} className="shrink-0 text-vybe-gold" />
+                    <span className="truncate">{user.city}</span>
+                  </span>
+                )}
+                {user.city && user.gender && <span aria-hidden>·</span>}
+                {user.gender && <span>{user.gender}</span>}
+              </p>
             )}
+          </div>
+
+          {/* Bio / About */}
+          {user.about && (
+            <p className="line-clamp-2 text-sm leading-relaxed text-white/70">
+              {user.about}
+            </p>
+          )}
+        </div>
+
+        {/* Favorite Artists */}
+        {user.favSingers.length > 0 && (
+          <div className="pt-2">
+            <span className="block text-[10px] font-mono tracking-wider text-white/40 uppercase">
+              Top Artists
+            </span>
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
+              {user.favSingers.slice(0, 6).map((singer) => (
+                <span
+                  key={singer}
+                  className="rounded-md border border-white/[0.08] bg-white/[0.04] px-2.5 py-1 text-xs text-white/80"
+                >
+                  {singer}
+                </span>
+              ))}
+              {user.favSingers.length > 6 && (
+                <span className="rounded-md border border-white/[0.05] bg-white/[0.02] px-2 py-1 text-xs text-white/40">
+                  +{user.favSingers.length - 6}
+                </span>
+              )}
+            </div>
           </div>
         )}
       </div>

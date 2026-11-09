@@ -1,9 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Heart, RotateCcw, X } from "lucide-react";
+import { MapPin, RotateCcw } from "lucide-react";
 import { authClient } from "../lib/auth-client";
-import { fetchFeed, sendSwipe, type FeedUser, type SwipeStatus } from "../lib/api";
+import {
+  fetchFeed,
+  fetchMyProfile,
+  sendSwipe,
+  type FeedUser,
+  type SwipeStatus,
+} from "../lib/api";
 import SwipeCard from "../components/feed/SwipeCard";
+import CityModal from "../components/feed/CityModal";
 
 /* Fetch the next page once the stack gets this low */
 const PREFETCH_AT = 3;
@@ -21,10 +28,13 @@ export default function Feed() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [exitStatus, setExitStatus] = useState<SwipeStatus | null>(null);
+  const [myCity, setMyCity] = useState<string | null>(null);
+  const [cityModalOpen, setCityModalOpen] = useState(false);
 
   /* Refs so effects can trigger the next page without re-fetch storms */
   const pageRef = useRef(0);
   const fetchingRef = useRef(false);
+  const cityLoadedRef = useRef(false);
 
   const loadNextPage = useCallback(async () => {
     if (fetchingRef.current) return;
@@ -58,6 +68,18 @@ export default function Feed() {
     if (user && pageRef.current === 0) void loadNextPage();
   }, [user, loadNextPage]);
 
+  /* Load the signed-in user's own city once; prompt for it if unset. */
+  useEffect(() => {
+    if (!user || cityLoadedRef.current) return;
+    cityLoadedRef.current = true;
+    void fetchMyProfile()
+      .then((profile) => {
+        setMyCity(profile.city);
+        if (!profile.city) setCityModalOpen(true);
+      })
+      .catch(() => setMyCity(null));
+  }, [user]);
+
   /* Prefetch before the stack visually runs dry. `!error` keeps a failed
      load from re-firing this effect in a loop — Retry is the way back. */
   useEffect(() => {
@@ -77,11 +99,6 @@ export default function Feed() {
           : "Your swipe could not be saved. Please try again later.",
       );
     });
-  };
-
-  const swipe = (status: SwipeStatus) => {
-    if (users.length === 0 || exitStatus) return;
-    setExitStatus(status);
   };
 
   const retry = () => {
@@ -124,9 +141,19 @@ export default function Feed() {
         <h2 className="font-heading text-3xl font-semibold text-white/80">
           Discover
         </h2>
-        <button onClick={signOut} className={ghostButton}>
-          Sign out
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setCityModalOpen(true)}
+            className="inline-flex max-w-[11rem] items-center gap-1.5 rounded-full border border-white/20 px-3 py-1.5 text-xs text-white/70 transition-[background-color,border-color] duration-200 hover:border-white/40 hover:bg-white/10"
+            aria-label={myCity ? `Your city: ${myCity}` : "Add your city"}
+          >
+            <MapPin size={13} className="shrink-0 text-vybe-gold" />
+            <span className="truncate">{myCity ?? "Add your city"}</span>
+          </button>
+          <button onClick={signOut} className={ghostButton}>
+            Sign out
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -142,8 +169,8 @@ export default function Feed() {
       )}
 
       {loading && users.length === 0 && (
-        <div className="relative mx-auto mt-8 h-[560px] max-w-sm">
-          <div className="absolute inset-x-0 h-full animate-pulse rounded-3xl border border-white/10 bg-vybe-850/60" />
+        <div className="relative mx-auto mt-8 h-[550px] max-w-sm">
+          <div className="absolute inset-x-0 h-full animate-pulse rounded-2xl border border-white/[0.08] bg-[#110e17]/80" />
         </div>
       )}
 
@@ -160,7 +187,7 @@ export default function Feed() {
       )}
 
       {users.length > 0 && (
-        <div className="relative mx-auto mt-8 h-[560px] max-w-sm">
+        <div className="relative mx-auto mt-8 h-[550px] max-w-sm">
           {/* Cards behind the top one, stacked with a subtle depth offset */}
           {users
             .slice(1, 3)
@@ -194,31 +221,16 @@ export default function Feed() {
         </div>
       )}
 
-      {users.length > 0 && (
-        <div className="mx-auto mt-8 flex max-w-sm items-center justify-center gap-6">
-          <button
-            onClick={() => swipe("ignored")}
-            disabled={!!exitStatus}
-            aria-label="Ignore"
-            className="flex h-16 w-16 items-center justify-center rounded-full border border-rose-400/40 text-rose-300 transition-[background-color,border-color] duration-200 hover:border-rose-400/70 hover:bg-rose-400/10 disabled:opacity-40"
-          >
-            <X size={28} />
-          </button>
-          <button
-            onClick={() => swipe("interested")}
-            disabled={!!exitStatus}
-            aria-label="Interested"
-            className="flex h-16 w-16 items-center justify-center rounded-full border border-emerald-400/40 text-emerald-300 transition-[background-color,border-color] duration-200 hover:border-emerald-400/70 hover:bg-emerald-400/10 disabled:opacity-40"
-          >
-            <Heart size={28} />
-          </button>
-        </div>
-      )}
-
       <p className="mt-8 text-center text-xs text-white/40">
-        Drag a card right if you&apos;re interested, left to ignore — or use the
-        buttons.
+        Drag a card right if you&apos;re interested, left to ignore.
       </p>
+
+      <CityModal
+        open={cityModalOpen}
+        initialCity={myCity ?? ""}
+        onClose={() => setCityModalOpen(false)}
+        onSaved={setMyCity}
+      />
     </main>
   );
 }
