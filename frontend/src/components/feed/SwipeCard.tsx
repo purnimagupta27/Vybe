@@ -105,7 +105,7 @@ export default function SwipeCard({
     return (
       <div
         aria-hidden
-        className="absolute inset-x-0 mx-auto max-w-sm rounded-3xl border border-white/10 bg-vybe-850/60"
+        className="absolute inset-x-0 mx-auto h-[520px] max-w-sm rounded-3xl border border-white/10 bg-vybe-850/60"
         style={{
           transform: `translateY(${index * -12}px) scale(${1 - index * 0.04})`,
         }}

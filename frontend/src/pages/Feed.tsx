@@ -58,12 +58,13 @@ export default function Feed() {
     if (user && pageRef.current === 0) void loadNextPage();
   }, [user, loadNextPage]);
 
-  /* Prefetch before the stack visually runs dry */
+  /* Prefetch before the stack visually runs dry. `!error` keeps a failed
+     load from re-firing this effect in a loop — Retry is the way back. */
   useEffect(() => {
-    if (user && !loading && hasMore && users.length <= PREFETCH_AT) {
+    if (user && !loading && !error && hasMore && users.length <= PREFETCH_AT) {
       void loadNextPage();
     }
-  }, [user, users.length, hasMore, loading, loadNextPage]);
+  }, [user, users.length, hasMore, loading, error, loadNextPage]);
 
   const handleExited = (status: SwipeStatus) => {
     const swipedUser = users[0];
