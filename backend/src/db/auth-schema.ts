@@ -18,6 +18,7 @@ export const user = pgTable("user", {
   gender: genderEnum("gender"),
   age: integer("age"),
   about: text("about"),
+  city: varchar("city", { length: 100 }),
   favSingers: text("fav_singers").array(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")

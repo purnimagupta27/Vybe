@@ -22,6 +22,7 @@ profileRouter.get("/view", (req: Request, res: Response) => {
       gender: user.gender ?? null,
       age: user.age ?? null,
       about: user.about ?? null,
+      city: user.city ?? null,
       favSingers: user.favSingers ?? [],
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
