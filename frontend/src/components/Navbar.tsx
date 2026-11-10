@@ -17,7 +17,7 @@ export default function Navbar() {
       provider: "google",
       /* Absolute URL derived from wherever the app is running (5173 or
          5174), so it matches Better Auth's trustedOrigins. */
-      callbackURL: `${window.location.origin}/feed`,
+      callbackURL: `${window.location.origin}/`,
     });
 
     /* On success the client redirects to Google, so we only get here when
@@ -45,12 +45,9 @@ export default function Navbar() {
 
       <div className="mr-2 flex flex-col items-end gap-1 sm:mr-8">
         {user ? (
-          <a
-            href="/feed"
-            className="rounded-full border border-white/25 px-6 py-2 text-sm font-medium text-white/90 transition-[background-color,border-color] duration-200 hover:border-white/40 hover:bg-white/10"
-          >
+          <span className="rounded-full border border-white/25 px-6 py-2 text-sm font-medium text-white/90">
             {user.name}
-          </a>
+          </span>
         ) : (
           <button
             type="button"
