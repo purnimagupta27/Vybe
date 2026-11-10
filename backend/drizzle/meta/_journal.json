@@ -50,6 +50,13 @@
       "when": 1793535410357,
       "tag": "0006_add_accepted_rejected_status",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794303851262,
+      "tag": "0007_profile_onboarding_song",
+      "breakpoints": true
     }
   ]
 }

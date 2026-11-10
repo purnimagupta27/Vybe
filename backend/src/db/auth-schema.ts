@@ -14,10 +14,12 @@ export const user = pgTable("user", {
   lastName: text("last_name"),
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
-  image: text("image").default("https://in.pinterest.com/pin/916341855432288019/"),
+  image: text("image"),
   gender: genderEnum("gender"),
   age: integer("age"),
   about: text("about"),
+  city: text("city"),
+  onboardingCompletedAt: timestamp("onboarding_completed_at"),
   favSingers: text("fav_singers").array(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
