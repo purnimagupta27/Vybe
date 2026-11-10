@@ -1,16 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { MapPin, RotateCcw } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 import { authClient } from "../lib/auth-client";
-import {
-  fetchFeed,
-  fetchMyProfile,
-  sendSwipe,
-  type FeedUser,
-  type SwipeStatus,
-} from "../lib/api";
+import { fetchFeed, sendSwipe, type FeedUser, type SwipeStatus } from "../lib/api";
 import SwipeCard from "../components/feed/SwipeCard";
-import CityModal from "../components/feed/CityModal";
 
 /* Fetch the next page once the stack gets this low */
 const PREFETCH_AT = 3;
@@ -28,13 +21,10 @@ export default function Feed() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [exitStatus, setExitStatus] = useState<SwipeStatus | null>(null);
-  const [myCity, setMyCity] = useState<string | null>(null);
-  const [cityModalOpen, setCityModalOpen] = useState(false);
 
   /* Refs so effects can trigger the next page without re-fetch storms */
   const pageRef = useRef(0);
   const fetchingRef = useRef(false);
-  const cityLoadedRef = useRef(false);
 
   const loadNextPage = useCallback(async () => {
     if (fetchingRef.current) return;
@@ -67,18 +57,6 @@ export default function Feed() {
   useEffect(() => {
     if (user && pageRef.current === 0) void loadNextPage();
   }, [user, loadNextPage]);
-
-  /* Load the signed-in user's own city once; prompt for it if unset. */
-  useEffect(() => {
-    if (!user || cityLoadedRef.current) return;
-    cityLoadedRef.current = true;
-    void fetchMyProfile()
-      .then((profile) => {
-        setMyCity(profile.city);
-        if (!profile.city) setCityModalOpen(true);
-      })
-      .catch(() => setMyCity(null));
-  }, [user]);
 
   /* Prefetch before the stack visually runs dry. `!error` keeps a failed
      load from re-firing this effect in a loop — Retry is the way back. */
@@ -141,19 +119,9 @@ export default function Feed() {
         <h2 className="font-heading text-3xl font-semibold text-white/80">
           Discover
         </h2>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setCityModalOpen(true)}
-            className="inline-flex max-w-[11rem] items-center gap-1.5 rounded-full border border-white/20 px-3 py-1.5 text-xs text-white/70 transition-[background-color,border-color] duration-200 hover:border-white/40 hover:bg-white/10"
-            aria-label={myCity ? `Your city: ${myCity}` : "Add your city"}
-          >
-            <MapPin size={13} className="shrink-0 text-vybe-gold" />
-            <span className="truncate">{myCity ?? "Add your city"}</span>
-          </button>
-          <button onClick={signOut} className={ghostButton}>
-            Sign out
-          </button>
-        </div>
+        <button onClick={signOut} className={ghostButton}>
+          Sign out
+        </button>
       </div>
 
       {error && (
@@ -224,13 +192,6 @@ export default function Feed() {
       <p className="mt-8 text-center text-xs text-white/40">
         Drag a card right if you&apos;re interested, left to ignore.
       </p>
-
-      <CityModal
-        open={cityModalOpen}
-        initialCity={myCity ?? ""}
-        onClose={() => setCityModalOpen(false)}
-        onSaved={setMyCity}
-      />
     </main>
   );
 }

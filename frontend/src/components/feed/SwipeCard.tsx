@@ -7,7 +7,6 @@ import {
   type PanInfo,
 } from "motion/react";
 import type { FeedUser, SwipeStatus } from "../../lib/api";
-import { MapPin } from "lucide-react";
 
 /* Horizontal px (or px/s flick) past which a drag commits the swipe */
 const COMMIT_DISTANCE = 110;
@@ -166,17 +165,8 @@ export default function SwipeCard({
                 <span className="text-xl text-white/50">{user.age}</span>
               )}
             </div>
-            {(user.city || user.gender) && (
-              <p className="mt-0.5 flex items-center gap-1.5 text-xs capitalize text-white/40">
-                {user.city && (
-                  <span className="flex min-w-0 items-center gap-1">
-                    <MapPin size={12} className="shrink-0 text-vybe-gold" />
-                    <span className="truncate">{user.city}</span>
-                  </span>
-                )}
-                {user.city && user.gender && <span aria-hidden>·</span>}
-                {user.gender && <span>{user.gender}</span>}
-              </p>
+            {user.gender && (
+              <p className="text-xs capitalize text-white/40">{user.gender}</p>
             )}
           </div>
 

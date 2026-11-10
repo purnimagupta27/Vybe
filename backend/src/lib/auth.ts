@@ -44,7 +44,6 @@ export const auth = betterAuth({
       gender: { type: ["male", "female", "others"], required: false, fieldName: "gender" },
       age: { type: "number", required: false, fieldName: "age" },
       about: { type: "string", required: false, fieldName: "about" },
-      city: { type: "string", required: false, fieldName: "city" },
       favSingers: { type: "string[]", required: false, fieldName: "favSingers" },
     },
   },

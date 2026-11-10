@@ -11,7 +11,6 @@ export type FeedUser = {
   gender: "male" | "female" | "others" | null;
   age: number | null;
   about: string | null;
-  city: string | null;
   favSingers: string[];
 };
 
@@ -53,21 +52,4 @@ export async function sendSwipe(
   toUserId: string,
 ): Promise<void> {
   await request(`/api/request/send/${status}/${toUserId}`, { method: "POST" });
-}
-
-export async function fetchMyProfile(): Promise<{ city: string | null }> {
-  const body = (await request("/api/profile/view")) as {
-    data: { city: string | null };
-  };
-  return { city: body.data.city ?? null };
-}
-
-export async function updateProfile(patch: {
-  city?: string | null;
-}): Promise<void> {
-  await request("/api/profile/edit", {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(patch),
-  });
 }

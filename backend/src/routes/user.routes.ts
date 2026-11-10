@@ -34,7 +34,6 @@ userRouter.get("/requests/received", async (req: Request, res: Response) => {
           gender: user.gender,
           age: user.age,
           about: user.about,
-          city: user.city,
           favSingers: user.favSingers,
         },
       })
@@ -93,7 +92,6 @@ userRouter.get("/connections", async (req: Request, res: Response) => {
       gender: user.gender,
       age: user.age,
       about: user.about,
-      city: user.city,
       favSingers: user.favSingers,
     }
 
@@ -207,7 +205,6 @@ userRouter.get("/feed", async (req: Request, res: Response) => {
         gender: user.gender,
         age: user.age,
         about: user.about,
-        city: user.city,
         favSingers: user.favSingers,
       })
       .from(user)

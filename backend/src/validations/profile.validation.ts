@@ -35,12 +35,6 @@ const aboutSchema = z
   .min(1, "About cannot be empty")
   .max(500, "About must be at most 500 characters");
 
-const citySchema = z
-  .string("City must be a string")
-  .trim()
-  .min(1, "City cannot be empty")
-  .max(100, "City must be at most 100 characters");
-
 const favSingersSchema = z.array(
   z.string("Favorite singers must be an array of strings").trim().min(1, "Singer name cannot be empty").max(100, "Singer name must be at most 100 characters"),
   {
@@ -58,7 +52,6 @@ export const editProfileSchema = z
     gender: genderSchema.nullable().optional(),
     age: ageSchema.nullable().optional(),
     about: aboutSchema.nullable().optional(),
-    city: citySchema.nullable().optional(),
     favSingers: favSingersSchema.nullable().optional(),
   })
   .strict();
