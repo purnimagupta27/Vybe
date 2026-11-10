@@ -2,8 +2,9 @@ import { z } from "zod";
 
 // Fields that a user is never allowed to modify through this API.
 // "email" gets its own explicit schema below so the error message is clear;
-// the rest are rejected as unknown keys by `.strict()`.
-const FORBIDDEN_FIELDS = ["id", "email", "emailVerified", "createdAt", "updatedAt"] as const;
+// the rest (including "image", which is only written by the photo upload
+// endpoint) are rejected as unknown keys by `.strict()`.
+const FORBIDDEN_FIELDS = ["id", "email", "emailVerified", "createdAt", "updatedAt", "image"] as const;
 
 const nameSchema = z
   .string("Name must be a string")
@@ -16,8 +17,6 @@ const lastNameSchema = z
   .trim()
   .min(1, "Last name cannot be empty")
   .max(50, "Last name must be at most 50 characters");
-
-const imageSchema = z.url("Image must be a valid URL").max(2048, "Image URL is too long");
 
 const genderSchema = z.enum(["male", "female", "others"], {
   error: "Gender must be one of: male, female, others",
@@ -42,15 +41,52 @@ const favSingersSchema = z.array(
   },
 ).max(30, "You can add at most 30 favorite singers");
 
+const citySchema = z
+  .string("City must be a string")
+  .trim()
+  .min(1, "City is required")
+  .max(100, "City must be at most 100 characters");
+
+const storySchema = z
+  .string("Song story must be a string")
+  .trim()
+  .min(1, "Song story is required")
+  .max(500, "Song story must be at most 500 characters");
+
+const songSchema = z
+  .object({
+    trackId: z
+      .string("Track id must be a string")
+      .trim()
+      .regex(/^[A-Za-z0-9]+$/, "Invalid Audius track id"),
+    story: storySchema,
+  })
+  .strict();
+
+export const completeProfileSchema = z
+  .object({
+    name: nameSchema,
+    lastName: lastNameSchema,
+    gender: genderSchema,
+    age: ageSchema,
+    city: citySchema,
+    about: aboutSchema,
+    favSingers: favSingersSchema.min(1, "Add at least one favorite singer"),
+    song: songSchema,
+  })
+  .strict();
+
+export type CompleteProfileInput = z.infer<typeof completeProfileSchema>;
+
 export const editProfileSchema = z
   .object({
     // A user can never change their email once the account is created.
     email: z.undefined({ error: "Email cannot be changed once added" }).optional(),
     name: nameSchema.nullable().optional(),
     lastName: lastNameSchema.nullable().optional(),
-    image: imageSchema.nullable().optional(),
     gender: genderSchema.nullable().optional(),
     age: ageSchema.nullable().optional(),
+    city: citySchema.nullable().optional(),
     about: aboutSchema.nullable().optional(),
     favSingers: favSingersSchema.nullable().optional(),
   })
