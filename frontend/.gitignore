@@ -3,3 +3,4 @@ dist
 node_modules/.tmp
 *.local
 .DS_Store
+.env
