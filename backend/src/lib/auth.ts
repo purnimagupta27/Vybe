@@ -51,19 +51,26 @@ export const auth = betterAuth({
     user: {
       create: {
         before: async (user) => {
-          validateUserFields(user);
+          // Google sends its own profile picture. The only writer of
+          // `user.image` is POST /api/profile/photo, so drop it here and
+          // start every new account without a photo.
+          const { image: _ignoredImage, ...profileData } = user;
+          validateUserFields(profileData);
           return {
-            data: { ...user, email: user.email?.toLowerCase() },
+            data: { ...profileData, image: null, email: profileData.email?.toLowerCase() },
           };
         },
       },
       update: {
         before: async (data) => {
-          validateUserFields(data);
+          // Omit `image` instead of setting it to null so a Better Auth
+          // update never wipes the photo uploaded through the API.
+          const { image: _ignoredImage, ...profileData } = data;
+          validateUserFields(profileData);
           return {
             data: {
-              ...data,
-              ...(data.email ? { email: data.email.toLowerCase() } : {}),
+              ...profileData,
+              ...(profileData.email ? { email: profileData.email.toLowerCase() } : {}),
             },
           };
         },
