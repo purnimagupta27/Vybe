@@ -11,6 +11,7 @@ import {
 import type { OnboardingDraft } from "./onboarding/draft";
 import StepAbout from "./onboarding/StepAbout";
 import StepBasics from "./onboarding/StepBasics";
+import StepSong from "./onboarding/StepSong";
 import WizardProgress from "./onboarding/WizardProgress";
 
 const ghostButtonClass =
@@ -128,12 +129,7 @@ export default function Onboarding() {
       <div className="mt-10">
         {step === 0 ? <StepBasics draft={draft} update={update} errors={errors} /> : null}
         {step === 1 ? <StepAbout draft={draft} update={update} errors={errors} /> : null}
-        {step === 2 ? (
-          <PlaceholderStep
-            title="Pick your song"
-            body="Song search and your track story land here next."
-          />
-        ) : null}
+        {step === 2 ? <StepSong draft={draft} update={update} errors={errors} /> : null}
         {step === 3 ? (
           <PlaceholderStep
             title="Add a profile photo"
@@ -158,7 +154,7 @@ export default function Onboarding() {
           <button
             type="button"
             onClick={next}
-            disabled={step >= 2 || submitting}
+            disabled={submitting}
             className={primaryButtonClass}
           >
             Continue
