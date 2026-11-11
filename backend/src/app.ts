@@ -9,6 +9,7 @@ import musicRouter from "./routes/music.routes.js"
 import requestRouter from './routes/request.routes.js';
 import { requireAuth } from './middleware/auth.middleware.js';
 import userRouter from './routes/user.routes.js';
+import { requireCompleteProfile } from "./middleware/completeProfile.middleware.js";
 
 
 const app = express()
@@ -36,8 +37,8 @@ app.all("/api/auth/*splat", toNodeHandler(auth))
 app.use(express.json())
 app.use("/api/profile", requireAuth, profileRouter)
 app.use("/api/music", requireAuth, musicRouter)
-app.use("/api/request", requireAuth, requestRouter)
-app.use("/api/user", requireAuth, userRouter)
+app.use("/api/request", requireAuth, requireCompleteProfile, requestRouter)
+app.use("/api/user", requireAuth, requireCompleteProfile, userRouter)
 
 
 
