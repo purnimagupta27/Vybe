@@ -1,7 +1,10 @@
-import { Router, type Request, type Response } from "express";
+import { Router, type NextFunction, type Request, type Response } from "express";
 import { eq } from "drizzle-orm";
+import multer from "multer";
 import db from "../index.js";
 import { user } from "../db/auth-schema.js";
+import { uploadProfilePhoto } from "../lib/cloudinary.js";
+import { isAllowedPhoto, MAX_PHOTO_BYTES } from "../lib/photo-rules.js";
 import { validate } from "../middleware/validate.middleware.js";
 import { editProfileSchema } from "../validations/profile.validation.js";
 
@@ -65,6 +68,49 @@ profileRouter.patch("/edit", validate(editProfileSchema), async (req: Request, r
     return res.status(500).json({
       status: "error",
       message: "Something went wrong while updating the profile. Please try again.",
+    });
+  }
+});
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: MAX_PHOTO_BYTES },
+});
+
+const uploadSingle = (req: Request, res: Response, next: NextFunction) => {
+  upload.single("photo")(req, res, (error) => {
+    if (error) {
+      res.status(400).json({
+        status: "error",
+        message: "Photo must be JPEG, PNG, or WebP under 5 MB.",
+      });
+      return;
+    }
+    next();
+  });
+};
+
+profileRouter.post("/photo", uploadSingle, async (req: Request, res: Response) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ status: "error", message: "Photo is required." });
+    }
+    if (!isAllowedPhoto(req.file.mimetype)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Photo must be JPEG, PNG, or WebP.",
+      });
+    }
+
+    const url = await uploadProfilePhoto(req.file.buffer);
+    await db.update(user).set({ image: url }).where(eq(user.id, req.user!.id));
+
+    return res.status(200).json({ status: "success", data: { url } });
+  } catch (error) {
+    console.error("Profile photo upload error:", error);
+    return res.status(500).json({
+      status: "error",
+      message: "Could not upload the photo. Please try again.",
     });
   }
 });
