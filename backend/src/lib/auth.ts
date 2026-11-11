@@ -63,13 +63,17 @@ export const auth = betterAuth({
       },
       update: {
         before: async (data) => {
-          // Omit `image` instead of setting it to null so a Better Auth
-          // update never wipes the photo uploaded through the API.
+          // Better Auth merges hook output over the incoming data, so omitting
+          // `image` would let a caller-supplied URL survive. Set it to
+          // `undefined` explicitly: the merge overwrites the incoming value and
+          // Drizzle drops `undefined` from the SET clause, preserving the photo
+          // uploaded through POST /api/profile/photo.
           const { image: _ignoredImage, ...profileData } = data;
           validateUserFields(profileData);
           return {
             data: {
               ...profileData,
+              image: undefined as unknown as string,
               ...(profileData.email ? { email: profileData.email.toLowerCase() } : {}),
             },
           };
@@ -80,6 +84,11 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
+  /* Better Auth's own update-user endpoint can write arbitrary user fields
+     (including `image`) and clear compulsory onboarding fields, bypassing both
+     the photo-only writer rule and the completed-profile guard. Profile edits
+     go through PATCH /api/profile/edit instead. */
+  disabledPaths: ["/update-user"],
   /* Google verifies the email address, so an existing email/password user
      who later signs in with Google is linked to the same account instead of
      hitting "account not linked". */
