@@ -5,6 +5,7 @@ import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth.js"
 import { trustedOrigins } from "./lib/origins.js"
 import profileRouter from "./routes/profile.routes.js"
+import musicRouter from "./routes/music.routes.js"
 import requestRouter from './routes/request.routes.js';
 import { requireAuth } from './middleware/auth.middleware.js';
 import userRouter from './routes/user.routes.js';
@@ -34,6 +35,7 @@ app.all("/api/auth/*splat", toNodeHandler(auth))
 
 app.use(express.json())
 app.use("/api/profile", requireAuth, profileRouter)
+app.use("/api/music", requireAuth, musicRouter)
 app.use("/api/request", requireAuth, requestRouter)
 app.use("/api/user", requireAuth, userRouter)
 
