@@ -70,3 +70,82 @@ export function validateSong(draft: OnboardingDraft): Record<string, string> {
 export function validatePhoto(draft: OnboardingDraft): Record<string, string> {
   return draft.photoUrl ? {} : { photo: "Upload a profile photo." };
 }
+
+const DRAFT_KEY_PREFIX = "vybe:onboarding-draft:";
+
+function isStoredSong(value: unknown): value is OnboardingDraft["song"] {
+  if (value === null) return true;
+  if (typeof value !== "object") return false;
+  const song = value as Record<string, unknown>;
+  return (
+    typeof song.id === "string" &&
+    typeof song.title === "string" &&
+    typeof song.artist === "string" &&
+    typeof song.streamUrl === "string" &&
+    typeof song.story === "string" &&
+    (song.artworkUrl === null || typeof song.artworkUrl === "string") &&
+    (song.durationSeconds === null || typeof song.durationSeconds === "number")
+  );
+}
+
+/**
+ * Reads the draft a user typed before a refresh. The photo is deliberately not
+ * read from storage: it is persisted server-side by the photo endpoint, so the
+ * profile view is always the source of truth for it.
+ */
+export function loadDraft(userId: string): OnboardingDraft | null {
+  try {
+    const raw = window.sessionStorage.getItem(DRAFT_KEY_PREFIX + userId);
+    if (!raw) return null;
+    const parsed: unknown = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return null;
+    const record = parsed as Record<string, unknown>;
+    const gender = record.gender;
+    if (typeof record.name !== "string") return null;
+    if (gender !== "" && gender !== "male" && gender !== "female" && gender !== "others") {
+      return null;
+    }
+    if (
+      !Array.isArray(record.favSingers) ||
+      !record.favSingers.every((singer) => typeof singer === "string")
+    ) {
+      return null;
+    }
+    if (!isStoredSong(record.song)) return null;
+    return {
+      name: record.name,
+      lastName: typeof record.lastName === "string" ? record.lastName : "",
+      gender,
+      age: typeof record.age === "string" ? record.age : "",
+      city: typeof record.city === "string" ? record.city : "",
+      about: typeof record.about === "string" ? record.about : "",
+      favSingers: record.favSingers,
+      song: record.song,
+      songStory: typeof record.songStory === "string" ? record.songStory : "",
+      photoUrl: null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/** Keeps typed progress across a refresh in the same tab. */
+export function saveDraft(userId: string, draft: OnboardingDraft): void {
+  const { name, lastName, gender, age, city, about, favSingers, song, songStory } = draft;
+  try {
+    window.sessionStorage.setItem(
+      DRAFT_KEY_PREFIX + userId,
+      JSON.stringify({ name, lastName, gender, age, city, about, favSingers, song, songStory }),
+    );
+  } catch {
+    // Storage can be unavailable (private mode, quota); the draft still lives in memory.
+  }
+}
+
+export function clearDraft(userId: string): void {
+  try {
+    window.sessionStorage.removeItem(DRAFT_KEY_PREFIX + userId);
+  } catch {
+    // Nothing to do if storage is unavailable.
+  }
+}

@@ -3,7 +3,10 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { completeProfile, type CompleteProfileInput } from "../lib/api";
 import { useProfile } from "../lib/profile-context";
 import {
+  clearDraft,
   emptyDraft,
+  loadDraft,
+  saveDraft,
   validateAbout,
   validateBasics,
   validatePhoto,
@@ -51,6 +54,22 @@ export default function Onboarding() {
     if (!profile || !profileId) return;
     if (prefilledRef.current === profileId) return;
     prefilledRef.current = profileId;
+
+    if (profile.onboardingCompletedAt) {
+      clearDraft(profileId);
+      return;
+    }
+
+    const photoUrl =
+      profile.image?.startsWith("https://res.cloudinary.com/") ? profile.image : null;
+    const stored = loadDraft(profileId);
+    if (stored) {
+      // A refresh mid-wizard: keep what the user typed, but the server is the
+      // source of truth for the uploaded photo.
+      setDraft({ ...stored, photoUrl });
+      return;
+    }
+
     setDraft({
       name: profile.name,
       lastName: profile.lastName ?? "",
@@ -71,13 +90,16 @@ export default function Onboarding() {
           }
         : null,
       songStory: profile.song?.story ?? "",
-      photoUrl:
-        profile.image?.startsWith("https://res.cloudinary.com/") ? profile.image : null,
+      photoUrl,
     });
   }, [profile, profileId]);
 
   function update(patch: Partial<OnboardingDraft>) {
-    setDraft((current) => ({ ...current, ...patch }));
+    setDraft((current) => {
+      const next = { ...current, ...patch };
+      if (profileId) saveDraft(profileId, next);
+      return next;
+    });
   }
 
   function next() {
@@ -143,6 +165,7 @@ export default function Onboarding() {
     setSubmitting(true);
     try {
       await completeProfile(input);
+      if (profileId) clearDraft(profileId);
       // Completion already succeeded, so a failed refresh must not block the
       // redirect — the profile page refetches on its own.
       await refresh();
