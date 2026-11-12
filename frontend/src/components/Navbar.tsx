@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AudioLines } from "lucide-react";
-import { authClient } from "../lib/auth-client";
+import { authClient, signInWithGoogle } from "../lib/auth-client";
 
 export default function Navbar() {
   const { data: session } = authClient.useSession();
@@ -13,21 +13,13 @@ export default function Navbar() {
     setError(null);
     setSigningIn(true);
 
-    const { error: signInError } = await authClient.signIn.social({
-      provider: "google",
-      /* Absolute URL derived from wherever the app is running (5173 or
-         5174), so it matches Better Auth's trustedOrigins. */
-      callbackURL: `${window.location.origin}/onboarding`,
-    });
+    const signInError = await signInWithGoogle();
 
     /* On success the client redirects to Google, so we only get here when
        something failed. */
     if (signInError) {
       setSigningIn(false);
-      setError(
-        signInError.message ??
-          "Could not start Google sign-in. Please try again.",
-      );
+      setError(signInError);
     }
   };
 

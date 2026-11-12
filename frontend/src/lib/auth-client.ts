@@ -10,3 +10,22 @@ const baseURL = import.meta.env.VITE_API_URL ?? "http://localhost:4000";
 export const authClient = createAuthClient({
   baseURL,
 });
+
+/**
+ * Starts Google OAuth sign-in via Better Auth and redirects to `/onboarding`.
+ * Returns an error message only when starting the flow fails.
+ */
+export async function signInWithGoogle(): Promise<string | null> {
+  const { error } = await authClient.signIn.social({
+    provider: "google",
+    /* Absolute URL derived from wherever the app is running (5173 or
+       5174), so it matches Better Auth's trustedOrigins. */
+    callbackURL: `${window.location.origin}/onboarding`,
+  });
+
+  if (error) {
+    return error.message ?? "Could not start Google sign-in. Please try again.";
+  }
+
+  return null;
+}

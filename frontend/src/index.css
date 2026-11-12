@@ -23,6 +23,10 @@
   /* --font-display: "Playfair Display", Georgia, serif; */
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: var(--font-sans);
 }
@@ -30,6 +34,8 @@ body {
 /* Zound-style backdrop: near-black plum base with violet/magenta glows */
 .hero-backdrop {
   background-color: #050306;
+  background-size: 100% 100vh;
+  background-repeat: no-repeat;
   background-image:
     radial-gradient(ellipse 60% 70% at 12% 75%, rgba(74, 13, 32, 0.7), transparent 72%),
     radial-gradient(ellipse 55% 65% at 88% 25%, rgba(109, 28, 94, 0.6), transparent 72%),
