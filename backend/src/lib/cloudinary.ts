@@ -1,11 +1,12 @@
 import { v2 as cloudinary } from "cloudinary";
+import "dotenv/config";
 
 // `exactOptionalPropertyTypes` forbids passing `undefined` for an optional key,
 // so missing credentials are omitted rather than set to undefined. Cloudinary
 // then fails the upload instead of silently configuring an empty account.
-const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-const apiKey = process.env.CLOUDINARY_API_KEY;
-const apiSecret = process.env.CLOUDINARY_API_SECRET;
+const cloudName = process.env.CLOUDINARY_CLOUD_NAME?.trim();
+const apiKey = process.env.CLOUDINARY_API_KEY?.trim();
+const apiSecret = process.env.CLOUDINARY_API_SECRET?.trim();
 
 cloudinary.config({
   ...(cloudName ? { cloud_name: cloudName } : {}),
@@ -13,7 +14,15 @@ cloudinary.config({
   ...(apiSecret ? { api_secret: apiSecret } : {}),
 });
 
+export function isCloudinaryConfigured(): boolean {
+  return Boolean(cloudName && apiKey && apiSecret);
+}
+
 export function uploadProfilePhoto(buffer: Buffer): Promise<string> {
+  if (!isCloudinaryConfigured()) {
+    return Promise.reject(new Error("Cloudinary credentials are not configured."));
+  }
+
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {

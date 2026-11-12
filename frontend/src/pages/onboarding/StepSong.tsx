@@ -1,4 +1,3 @@
-import { useEffect, useRef } from "react";
 import type { OnboardingDraft } from "./draft";
 import TrackSearch from "./TrackSearch";
 
@@ -21,20 +20,14 @@ function FieldError({ message }: { message?: string }) {
 
 export default function StepSong({ draft, update, errors }: StepSongProps) {
   const song = draft.song;
-  // Keep the story around while the user swaps songs; TrackSearch clears the
-  // selection before a new track can be picked.
-  const storyRef = useRef("");
-
-  useEffect(() => {
-    if (draft.song) storyRef.current = draft.song.story;
-  }, [draft.song]);
 
   function selectSong(next: OnboardingDraft["song"]) {
     if (!next) {
+      // Keep `songStory` so a later selection restores the typed story.
       update({ song: null });
       return;
     }
-    update({ song: { ...next, story: next.story || storyRef.current } });
+    update({ song: { ...next, story: draft.songStory } });
   }
 
   return (
@@ -50,14 +43,19 @@ export default function StepSong({ draft, update, errors }: StepSongProps) {
             <label htmlFor="onboarding-story" className={labelClass}>
               The story behind it
             </label>
-            <span className="text-xs tabular-nums text-white/35">{song.story.length}/500</span>
+            <span className="text-xs tabular-nums text-white/35">{draft.songStory.length}/500</span>
           </div>
           <textarea
             id="onboarding-story"
             rows={5}
             maxLength={500}
-            value={song.story}
-            onChange={(event) => update({ song: { ...song, story: event.target.value } })}
+            value={draft.songStory}
+            onChange={(event) =>
+              update({
+                song: { ...song, story: event.target.value },
+                songStory: event.target.value,
+              })
+            }
             placeholder="What does this song mean to you?"
             className={textareaClass}
           />

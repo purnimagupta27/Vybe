@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
+import { completeProfile, type CompleteProfileInput } from "../lib/api";
 import { useProfile } from "../lib/profile-context";
 import {
   emptyDraft,
@@ -11,6 +12,7 @@ import {
 import type { OnboardingDraft } from "./onboarding/draft";
 import StepAbout from "./onboarding/StepAbout";
 import StepBasics from "./onboarding/StepBasics";
+import StepPhoto from "./onboarding/StepPhoto";
 import StepSong from "./onboarding/StepSong";
 import WizardProgress from "./onboarding/WizardProgress";
 
@@ -20,17 +22,23 @@ const ghostButtonClass =
 const primaryButtonClass =
   "cursor-pointer rounded-full bg-vybe-accent px-6 py-2.5 text-sm font-medium text-white transition-opacity duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:opacity-40";
 
-function PlaceholderStep({ title, body }: { title: string; body: string }) {
-  return (
-    <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.03] px-6 py-12 text-center">
-      <h2 className="font-heading text-xl text-white/80">{title}</h2>
-      <p className="mt-2 text-sm text-white/45">{body}</p>
-    </div>
-  );
+function normalizeFavSingers(values: string[]): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const value of values) {
+    const trimmed = value.trim();
+    if (!trimmed) continue;
+    const key = trimmed.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(trimmed);
+  }
+  return result;
 }
 
 export default function Onboarding() {
   const { profile, loading, error, refresh } = useProfile();
+  const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState<OnboardingDraft>(emptyDraft);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -62,6 +70,7 @@ export default function Onboarding() {
             story: profile.song.story,
           }
         : null,
+      songStory: profile.song?.story ?? "",
       photoUrl:
         profile.image?.startsWith("https://res.cloudinary.com/") ? profile.image : null,
     });
@@ -91,6 +100,59 @@ export default function Onboarding() {
     setSubmitError(null);
     setSubmitting(false);
     setStep((current) => Math.max(current - 1, 0));
+  }
+
+  async function submit() {
+    if (submitting) return;
+    setSubmitError(null);
+
+    const basicsErrors = validateBasics(draft);
+    const aboutErrors = validateAbout(draft);
+    const songErrors = validateSong(draft);
+    const photoErrors = validatePhoto(draft);
+
+    const firstInvalid =
+      Object.keys(basicsErrors).length > 0
+        ? 0
+        : Object.keys(aboutErrors).length > 0
+          ? 1
+          : Object.keys(songErrors).length > 0
+            ? 2
+            : Object.keys(photoErrors).length > 0
+              ? 3
+              : null;
+
+    // The validators above guarantee these, but the checks narrow the types.
+    if (firstInvalid !== null || !draft.song || !draft.gender) {
+      setErrors({ ...basicsErrors, ...aboutErrors, ...songErrors, ...photoErrors });
+      setStep(firstInvalid ?? 0);
+      return;
+    }
+
+    const input: CompleteProfileInput = {
+      name: draft.name.trim(),
+      lastName: draft.lastName.trim(),
+      gender: draft.gender,
+      age: Number(draft.age),
+      city: draft.city.trim(),
+      about: draft.about.trim(),
+      favSingers: normalizeFavSingers(draft.favSingers),
+      song: { trackId: draft.song.id, story: draft.song.story.trim() },
+    };
+
+    setSubmitting(true);
+    try {
+      await completeProfile(input);
+      // Completion already succeeded, so a failed refresh must not block the
+      // redirect — the profile page refetches on its own.
+      await refresh();
+      navigate("/discover");
+    } catch (err) {
+      setSubmitError(
+        err instanceof Error ? err.message : "Could not finish your profile. Please try again.",
+      );
+      setSubmitting(false);
+    }
   }
 
   if (loading) {
@@ -130,12 +192,7 @@ export default function Onboarding() {
         {step === 0 ? <StepBasics draft={draft} update={update} errors={errors} /> : null}
         {step === 1 ? <StepAbout draft={draft} update={update} errors={errors} /> : null}
         {step === 2 ? <StepSong draft={draft} update={update} errors={errors} /> : null}
-        {step === 3 ? (
-          <PlaceholderStep
-            title="Add a profile photo"
-            body="Photo upload and finishing your profile land here next."
-          />
-        ) : null}
+        {step === 3 ? <StepPhoto draft={draft} update={update} errors={errors} /> : null}
       </div>
 
       {submitError ? <p className="mt-6 text-sm text-red-300">{submitError}</p> : null}
@@ -160,8 +217,13 @@ export default function Onboarding() {
             Continue
           </button>
         ) : (
-          <button type="button" disabled className={primaryButtonClass}>
-            Finish
+          <button
+            type="button"
+            onClick={() => void submit()}
+            disabled={submitting}
+            className={primaryButtonClass}
+          >
+            {submitting ? "Finishing…" : "Finish"}
           </button>
         )}
       </div>

@@ -5,7 +5,7 @@ import db from "../index.js";
 import { user } from "../db/auth-schema.js";
 import { profileSong } from "../db/profileSong-schema.js";
 import { buildAudiusStreamUrl, getAudiusTrack } from "../lib/audius.js";
-import { uploadProfilePhoto } from "../lib/cloudinary.js";
+import { isCloudinaryConfigured, uploadProfilePhoto } from "../lib/cloudinary.js";
 import { isAllowedPhoto, MAX_PHOTO_BYTES } from "../lib/photo-rules.js";
 import { validate } from "../middleware/validate.middleware.js";
 import {
@@ -262,13 +262,24 @@ const uploadSingle = (req: Request, res: Response, next: NextFunction) => {
 
 profileRouter.post("/photo", uploadSingle, async (req: Request, res: Response) => {
   try {
-    if (!req.file) {
+    if (!req.file || req.file.size === 0) {
       return res.status(400).json({ status: "error", message: "Photo is required." });
     }
     if (!isAllowedPhoto(req.file.mimetype)) {
       return res.status(400).json({
         status: "error",
         message: "Photo must be JPEG, PNG, or WebP.",
+      });
+    }
+
+    if (!isCloudinaryConfigured()) {
+      console.error(
+        "Profile photo upload error: CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, or CLOUDINARY_API_SECRET is missing.",
+      );
+      return res.status(503).json({
+        status: "error",
+        message:
+          "Photo uploads are not configured on the server. Add the CLOUDINARY_* values to backend/.env and restart.",
       });
     }
 

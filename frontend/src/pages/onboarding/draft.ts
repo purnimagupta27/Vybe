@@ -15,6 +15,9 @@ export type OnboardingDraft = {
     streamUrl: string;
     story: string;
   } | null;
+  /* The story survives a song change, so it is kept separately from the
+     selected track until the user picks a replacement. */
+  songStory: string;
   photoUrl: string | null;
 };
 
@@ -27,6 +30,7 @@ export const emptyDraft: OnboardingDraft = {
   about: "",
   favSingers: [],
   song: null,
+  songStory: "",
   photoUrl: null,
 };
 
