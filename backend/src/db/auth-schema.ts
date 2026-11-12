@@ -27,6 +27,9 @@ export const user = pgTable("user", {
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
 }, (table) => [
+  // The discover feed orders by (created_at, id) DESC; this index lets it walk
+  // the table in order and stop after a page instead of sorting everything.
+  index("user_created_at_id_idx").on(table.createdAt, table.id),
   check("user_name_length_check", sql`char_length(${table.name}) >= 4`),
   check("user_age_min_check", sql`${table.age} >= 18`),
   check("user_fav_singers_max_check", sql`array_length(${table.favSingers}, 1) <= 30`),

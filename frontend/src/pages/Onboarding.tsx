@@ -243,10 +243,10 @@ export default function Onboarding() {
           <button
             type="button"
             onClick={() => void submit()}
-            disabled={submitting || !draft.photoUrl}
+            disabled={submitting}
             className={primaryButtonClass}
           >
-            {submitting ? "Finishing…" : "Finish profile"}
+            {submitting ? "Finishing…" : "Finish"}
           </button>
         )}
       </div>

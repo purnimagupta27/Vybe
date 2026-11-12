@@ -57,6 +57,13 @@
       "when": 1794303851262,
       "tag": "0007_profile_onboarding_song",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794471119682,
+      "tag": "0008_vengeful_spiral",
+      "breakpoints": true
     }
   ]
 }

@@ -1,6 +1,10 @@
 import { Router, type Request, type Response } from "express";
 import { z } from "zod";
-import { buildAudiusStreamUrl, searchAudiusTracks } from "../lib/audius.js";
+import {
+  buildAudiusStreamUrl,
+  searchAudiusArtists,
+  searchAudiusTracks,
+} from "../lib/audius.js";
 
 const musicRouter: Router = Router();
 
@@ -31,6 +35,30 @@ musicRouter.get("/search", async (req: Request, res: Response) => {
     return res.status(502).json({
       status: "error",
       message: "Music search is unavailable right now. Please try again.",
+    });
+  }
+});
+
+musicRouter.get("/singers", async (req: Request, res: Response) => {
+  const parsed = searchQuerySchema.safeParse(req.query);
+  if (!parsed.success) {
+    return res.status(400).json({
+      status: "error",
+      message: parsed.error.issues[0]?.message ?? "Invalid search query.",
+    });
+  }
+
+  try {
+    const artists = await searchAudiusArtists(parsed.data.q);
+    return res.status(200).json({
+      status: "success",
+      data: artists,
+    });
+  } catch (error) {
+    console.error("Audius singer search error:", error);
+    return res.status(502).json({
+      status: "error",
+      message: "Singer search is unavailable right now. Please try again.",
     });
   }
 });

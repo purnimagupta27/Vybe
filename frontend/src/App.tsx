@@ -7,13 +7,14 @@ import { ProfileProvider } from "./lib/profile-context";
 import Discover from "./pages/Discover";
 import Landing from "./pages/Landing";
 import Onboarding from "./pages/Onboarding";
+import Profile from "./pages/Profile";
 
 function App() {
   return (
     <BrowserRouter>
       <ProfileProvider>
         <div className="min-h-screen bg-[#050306] text-vybe-200">
-          <div className="hero-backdrop relative isolate">
+          <div className="hero-backdrop relative isolate min-h-screen">
             <Navbar />
             <Routes>
               <Route
@@ -39,6 +40,14 @@ function App() {
                     <RequireProfile>
                       <Discover />
                     </RequireProfile>
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <RequireAuth>
+                    <Profile />
                   </RequireAuth>
                 }
               />

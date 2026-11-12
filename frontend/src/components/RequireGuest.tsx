@@ -10,7 +10,12 @@ import { authClient } from "../lib/auth-client";
 export default function RequireGuest({ children }: { children: ReactNode }) {
   const { data: session, isPending } = authClient.useSession();
   if (isPending) {
-    return <p className="px-6 py-16 text-sm text-white/50">Checking your session…</p>;
+    return (
+      <main className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center px-6 text-sm text-white/50">
+        <div className="size-6 animate-spin rounded-full border-2 border-white/20 border-t-vybe-gold mb-3" />
+        <p>Loading…</p>
+      </main>
+    );
   }
   if (session?.user) return <Navigate to="/discover" replace />;
   return <>{children}</>;

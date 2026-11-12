@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { buildAudiusStreamUrl, getAudiusTrack, mapAudiusTrack } from "./audius.js";
+import {
+  buildAudiusStreamUrl,
+  getAudiusTrack,
+  mapAudiusArtist,
+  mapAudiusTrack,
+} from "./audius.js";
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -43,5 +48,30 @@ describe("getAudiusTrack", () => {
   it("returns null when Audius responds non-OK", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false }));
     await expect(getAudiusTrack("ZlwB7")).resolves.toBeNull();
+  });
+});
+
+describe("mapAudiusArtist", () => {
+  it("maps an Audius artist profile correctly", () => {
+    expect(
+      mapAudiusArtist({
+        id: "AxV27",
+        name: "Spakinsky",
+        handle: "spakinsky",
+        is_verified: true,
+        profile_picture: { "150x150": "https://img.example/pic.jpg" },
+      }),
+    ).toEqual({
+      id: "AxV27",
+      name: "Spakinsky",
+      handle: "spakinsky",
+      isVerified: true,
+      profilePictureUrl: "https://img.example/pic.jpg",
+    });
+  });
+
+  it("returns null when id or name is missing", () => {
+    expect(mapAudiusArtist({ id: "AxV27" })).toBeNull();
+    expect(mapAudiusArtist({ name: "" })).toBeNull();
   });
 });

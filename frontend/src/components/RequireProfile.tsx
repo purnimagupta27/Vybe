@@ -5,11 +5,16 @@ import { useProfile } from "../lib/profile-context";
 export default function RequireProfile({ children }: { children: ReactNode }) {
   const { profile, loading, error, refresh } = useProfile();
   if (loading) {
-    return <p className="px-6 py-16 text-sm text-white/50">Loading your profile…</p>;
+    return (
+      <main className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center px-6 text-sm text-white/50">
+        <div className="size-6 animate-spin rounded-full border-2 border-white/20 border-t-vybe-gold mb-3" />
+        <p>Loading…</p>
+      </main>
+    );
   }
   if (!profile && error) {
     return (
-      <div className="px-6 py-16">
+      <main className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center px-6 text-center">
         <p className="text-sm text-white/70">{error}</p>
         <button
           type="button"
@@ -18,7 +23,7 @@ export default function RequireProfile({ children }: { children: ReactNode }) {
         >
           Try again
         </button>
-      </div>
+      </main>
     );
   }
   if (!profile?.onboardingCompletedAt) return <Navigate to="/onboarding" replace />;

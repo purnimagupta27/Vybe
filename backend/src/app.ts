@@ -7,6 +7,7 @@ import { trustedOrigins } from "./lib/origins.js"
 import profileRouter from "./routes/profile.routes.js"
 import musicRouter from "./routes/music.routes.js"
 import requestRouter from './routes/request.routes.js';
+import feedRouter from "./routes/feed.routes.js";
 import { requireAuth } from './middleware/auth.middleware.js';
 import userRouter from './routes/user.routes.js';
 import { requireCompleteProfile } from "./middleware/completeProfile.middleware.js";
@@ -39,6 +40,7 @@ app.use("/api/profile", requireAuth, profileRouter)
 app.use("/api/music", requireAuth, musicRouter)
 app.use("/api/request", requireAuth, requireCompleteProfile, requestRouter)
 app.use("/api/user", requireAuth, requireCompleteProfile, userRouter)
+app.use("/api/feed", requireAuth, requireCompleteProfile, feedRouter)
 
 
 
