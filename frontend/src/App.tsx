@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import RequireAuth from "./components/RequireAuth";
+import RequireGuest from "./components/RequireGuest";
 import RequireProfile from "./components/RequireProfile";
 import { ProfileProvider } from "./lib/profile-context";
 import Discover from "./pages/Discover";
@@ -15,7 +16,14 @@ function App() {
           <div className="hero-backdrop relative isolate">
             <Navbar />
             <Routes>
-              <Route path="/" element={<Landing />} />
+              <Route
+                path="/"
+                element={
+                  <RequireGuest>
+                    <Landing />
+                  </RequireGuest>
+                }
+              />
               <Route
                 path="/onboarding"
                 element={
