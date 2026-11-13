@@ -178,3 +178,50 @@ export async function sendConnectionRequest(
     { method: "POST" },
   );
 }
+
+/** The sender details the received-requests endpoint exposes — never email. */
+export type ReceivedRequestSender = {
+  id: string;
+  name: string;
+  lastName: string | null;
+  image: string | null;
+  gender: "male" | "female" | "others" | null;
+  age: number | null;
+  about: string | null;
+  favSingers: string[];
+};
+
+export type ReceivedConnectionRequest = {
+  /** The connection-request row id — for keys only, not for reviewing. */
+  requestId: string;
+  status: "interested";
+  createdAt: string;
+  sender: ReceivedRequestSender;
+};
+
+export async function getReceivedRequests(
+  signal?: AbortSignal,
+): Promise<ReceivedConnectionRequest[]> {
+  const body = await request<{ data: ReceivedConnectionRequest[] }>(
+    "/api/user/requests/received",
+    { signal },
+  );
+  return body.data;
+}
+
+/** What the receiver can do with a pending request. */
+export type ReviewDecision = "accepted" | "rejected";
+
+/**
+ * The review endpoint matches the URL segment against the SENDER's user id, not
+ * the request row id, so `senderId` — never `requestId` — goes in the path.
+ */
+export async function reviewConnectionRequest(
+  senderId: string,
+  status: ReviewDecision,
+): Promise<void> {
+  await request(
+    `/api/request/review/${status}/${encodeURIComponent(senderId)}`,
+    { method: "POST" },
+  );
+}

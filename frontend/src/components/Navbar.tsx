@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { AudioLines, Compass, LogOut, User } from "lucide-react";
+import { AudioLines, Compass, LogOut, User, Users } from "lucide-react";
 import { authClient, signInWithGoogle } from "../lib/auth-client";
 import { useProfile } from "../lib/profile-context";
 
@@ -79,9 +79,24 @@ export default function Navbar() {
         </span>
       </Link>
 
-      <div className="relative mr-2 sm:mr-8" ref={menuRef}>
+      <div className="mr-2 flex items-center gap-4 sm:mr-8">
+        {user && (
+          <Link
+            to="/connections"
+            aria-label="Connection requests"
+            className="group relative flex size-10 items-center justify-center rounded-full border border-white/25 bg-white/5 text-white/70 transition-all duration-200 hover:border-white/50 hover:bg-white/10 hover:text-white hover:scale-105 focus:outline-none focus:ring-2 focus:ring-vybe-gold/50"
+          >
+            <Users aria-hidden className="size-[18px]" />
+            <span className="pointer-events-none absolute right-0 top-full z-10 mt-2 whitespace-nowrap rounded-lg border border-white/15 bg-[#0e0914]/95 px-2.5 py-1 text-[11px] text-white/80 opacity-0 shadow-xl backdrop-blur-xl transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100">
+              Connection requests
+            </span>
+          </Link>
+        )}
+
+        <div className="relative" ref={menuRef}>
         {user ? (
           <div>
+            <div className="group relative">
             <button
               type="button"
               onClick={() => setDropdownOpen((prev) => !prev)}
@@ -102,6 +117,13 @@ export default function Navbar() {
                 </span>
               )}
             </button>
+
+            {!dropdownOpen && (
+              <span className="pointer-events-none absolute right-0 top-full z-10 mt-2 whitespace-nowrap rounded-lg border border-white/15 bg-[#0e0914]/95 px-2.5 py-1 text-[11px] text-white/80 opacity-0 shadow-xl backdrop-blur-xl transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100">
+                Profile
+              </span>
+            )}
+            </div>
 
             {dropdownOpen && (
               <div className="absolute right-0 top-full mt-3 w-60 overflow-hidden rounded-2xl border border-white/15 bg-[#0e0914]/95 p-2 shadow-2xl backdrop-blur-xl animate-in fade-in duration-150">
@@ -176,6 +198,7 @@ export default function Navbar() {
             )}
           </div>
         )}
+        </div>
       </div>
 
       {signingOut && (

@@ -5,6 +5,7 @@ import RequireGuest from "./components/RequireGuest";
 import RequireProfile from "./components/RequireProfile";
 import { ProfileProvider } from "./lib/profile-context";
 import Discover from "./pages/Discover";
+import Connections from "./pages/Connections";
 import Landing from "./pages/Landing";
 import Onboarding from "./pages/Onboarding";
 import Profile from "./pages/Profile";
@@ -40,6 +41,16 @@ function App() {
                   <RequireAuth>
                     <RequireProfile>
                       <Discover />
+                    </RequireProfile>
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/connections"
+                element={
+                  <RequireAuth>
+                    <RequireProfile>
+                      <Connections />
                     </RequireProfile>
                   </RequireAuth>
                 }
