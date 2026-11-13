@@ -209,6 +209,20 @@ export async function getReceivedRequests(
   return body.data;
 }
 
+/** Another user's profile — the same public shape the discover feed returns. */
+export type PublicProfile = FeedProfile;
+
+export async function getPublicProfile(
+  userId: string,
+  signal?: AbortSignal,
+): Promise<PublicProfile> {
+  const body = await request<{ data: PublicProfile }>(
+    `/api/profile/${encodeURIComponent(userId)}`,
+    { signal },
+  );
+  return body.data;
+}
+
 /** What the receiver can do with a pending request. */
 export type ReviewDecision = "accepted" | "rejected";
 

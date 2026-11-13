@@ -1,5 +1,5 @@
 import { Router, type NextFunction, type Request, type Response } from "express";
-import { eq } from "drizzle-orm";
+import { and, eq, isNotNull } from "drizzle-orm";
 import multer from "multer";
 import db from "../index.js";
 import { user } from "../db/auth-schema.js";
@@ -99,6 +99,86 @@ profileRouter.get("/view", async (req: Request, res: Response) => {
     return res.status(500).json({
       status: "error",
       message: "Could not load the profile. Please try again.",
+    });
+  }
+});
+
+// GET /api/profile/:userId
+// Another user's profile, as seen by the logged-in user. Same public shape as
+// the discover feed: email and every other private column stay out. Only
+// completed profiles are viewable, so a half-onboarded user is a 404 rather
+// than a page of empty fields.
+profileRouter.get("/:userId", async (req: Request, res: Response) => {
+  try {
+    const userId = req.params.userId;
+    if (typeof userId !== "string" || userId.length === 0) {
+      return res.status(400).json({
+        status: "error",
+        message: "A user id is required.",
+      });
+    }
+
+    const [row] = await db
+      .select({
+        id: user.id,
+        name: user.name,
+        lastName: user.lastName,
+        image: user.image,
+        gender: user.gender,
+        age: user.age,
+        city: user.city,
+        about: user.about,
+        favSingers: user.favSingers,
+        songTrackId: profileSong.providerTrackId,
+        songTitle: profileSong.title,
+        songArtist: profileSong.artist,
+        songArtworkUrl: profileSong.artworkUrl,
+        songDurationSeconds: profileSong.durationSeconds,
+        songStory: profileSong.story,
+      })
+      .from(user)
+      .leftJoin(profileSong, eq(profileSong.userId, user.id))
+      .where(and(eq(user.id, userId), isNotNull(user.onboardingCompletedAt)))
+      .limit(1);
+
+    if (!row) {
+      return res.status(404).json({
+        status: "error",
+        message: "Profile not found.",
+      });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      message: "Profile fetched successfully",
+      data: {
+        id: row.id,
+        name: row.name,
+        lastName: row.lastName ?? null,
+        gender: row.gender ?? null,
+        age: row.age ?? null,
+        image: row.image ?? null,
+        city: row.city ?? null,
+        about: row.about ?? null,
+        favSingers: row.favSingers ?? [],
+        song:
+          row.songTrackId === null
+            ? null
+            : {
+                title: row.songTitle!,
+                artist: row.songArtist!,
+                artworkUrl: row.songArtworkUrl,
+                durationSeconds: row.songDurationSeconds,
+                story: row.songStory!,
+                streamUrl: buildAudiusStreamUrl(row.songTrackId),
+              },
+      },
+    });
+  } catch (error) {
+    console.error("Public profile view error:", error);
+    return res.status(500).json({
+      status: "error",
+      message: "Could not load that profile. Please try again.",
     });
   }
 });

@@ -10,6 +10,7 @@ import Landing from "./pages/Landing";
 import Onboarding from "./pages/Onboarding";
 import Profile from "./pages/Profile";
 import ProfileEdit from "./pages/ProfileEdit";
+import UserProfile from "./pages/UserProfile";
 
 function App() {
   return (
@@ -61,6 +62,16 @@ function App() {
                   <RequireAuth>
                     <RequireProfile>
                       <ProfileEdit />
+                    </RequireProfile>
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/profile/:userId"
+                element={
+                  <RequireAuth>
+                    <RequireProfile>
+                      <UserProfile />
                     </RequireProfile>
                   </RequireAuth>
                 }

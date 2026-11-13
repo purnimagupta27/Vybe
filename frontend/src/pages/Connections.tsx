@@ -88,13 +88,13 @@ export default function Connections() {
   return (
     <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-2xl px-6 py-8">
       <header className="mb-8">
-        <Link
+        {/* <Link
           to="/profile"
           className="group inline-flex items-center gap-2 rounded-full bg-white/5 px-4 py-2 text-sm text-white/70 transition-all hover:bg-white/10 hover:text-white"
         >
           <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-0.5" />
           <span>Back to profile</span>
-        </Link>
+        </Link> */}
         <div className="mt-6 flex flex-wrap items-end justify-between gap-2">
           <div>
             <h1 className="font-heading text-2xl font-semibold tracking-tight text-white/90 sm:text-3xl">
@@ -168,10 +168,19 @@ export default function Connections() {
             return (
               <li
                 key={request.requestId}
-                className="rounded-2xl border border-white/12 bg-white/[0.04] p-4 sm:p-5"
+                className="group relative overflow-hidden rounded-2xl border border-white/12 bg-white/[0.04] transition-colors hover:border-white/25 hover:bg-white/[0.06]"
               >
-                <div className="flex items-center gap-4">
-                  <div className="size-16 shrink-0 overflow-hidden rounded-full bg-white/5">
+                {/* The whole card is the link. It sits under the content, and the
+                    content is pointer-transparent, so a click anywhere opens the
+                    profile — except on the action buttons, which opt back in. */}
+                <Link
+                  to={`/profile/${encodeURIComponent(sender.id)}`}
+                  aria-label={`View ${displayName(request)}'s profile`}
+                  className="absolute inset-0 z-0 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-vybe-gold/60"
+                />
+
+                <div className="pointer-events-none relative z-10 flex items-center gap-4 p-4 sm:p-5">
+                  <div className="size-16 shrink-0 overflow-hidden rounded-full bg-white/5 ring-1 ring-transparent transition-[box-shadow] group-hover:ring-white/25">
                     {sender.image ? (
                       <img
                         src={sender.image}
@@ -186,7 +195,7 @@ export default function Connections() {
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-heading text-lg leading-tight text-white/95">
+                    <p className="truncate font-heading text-lg leading-tight text-white/95 transition-colors group-hover:text-white">
                       {displayName(request)}
                       {sender.age ? (
                         <span className="ml-1.5 font-normal text-white/50">{sender.age}</span>
@@ -197,7 +206,7 @@ export default function Connections() {
                     )}
                   </div>
 
-                  <div className="flex shrink-0 items-center gap-2">
+                  <div className="pointer-events-auto flex shrink-0 items-center gap-2">
                     <button
                       type="button"
                       onClick={() => void review(request, "rejected")}
