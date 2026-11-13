@@ -8,6 +8,7 @@ import Discover from "./pages/Discover";
 import Landing from "./pages/Landing";
 import Onboarding from "./pages/Onboarding";
 import Profile from "./pages/Profile";
+import ProfileEdit from "./pages/ProfileEdit";
 
 function App() {
   return (
@@ -39,6 +40,16 @@ function App() {
                   <RequireAuth>
                     <RequireProfile>
                       <Discover />
+                    </RequireProfile>
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/profile/edit"
+                element={
+                  <RequireAuth>
+                    <RequireProfile>
+                      <ProfileEdit />
                     </RequireProfile>
                   </RequireAuth>
                 }

@@ -89,6 +89,7 @@ export const editProfileSchema = z
     city: citySchema.nullable().optional(),
     about: aboutSchema.nullable().optional(),
     favSingers: favSingersSchema.nullable().optional(),
+    song: songSchema.optional(),
   })
   .strict();
 

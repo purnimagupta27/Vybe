@@ -167,7 +167,7 @@ export default function Navbar() {
               disabled={signingIn}
               className="cursor-pointer rounded-full border border-white/25 px-6 py-2 text-sm font-medium text-white/90 transition-[background-color,border-color] duration-200 hover:border-white/40 hover:bg-white/10 disabled:cursor-wait disabled:opacity-60"
             >
-              {signingIn ? "Redirecting..." : "Join now"}
+              {signingIn ? "Joining..." : "Join"}
             </button>
             {error && (
               <p className="max-w-[240px] text-right text-xs text-red-400">

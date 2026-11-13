@@ -8,6 +8,8 @@ type StepPhotoProps = {
   draft: OnboardingDraft;
   update: (patch: Partial<OnboardingDraft>) => void;
   errors: Record<string, string>;
+  /* Lets a parent (e.g. the edit page) disable Save while an upload runs. */
+  onUploadingChange?: (uploading: boolean) => void;
 };
 
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -24,7 +26,12 @@ function FieldError({ message }: { message?: string }) {
   return <p className="mt-1.5 text-xs text-red-300">{message}</p>;
 }
 
-export default function StepPhoto({ draft, update, errors }: StepPhotoProps) {
+export default function StepPhoto({
+  draft,
+  update,
+  errors,
+  onUploadingChange,
+}: StepPhotoProps) {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [localPreview, setLocalPreview] = useState<string | null>(null);
@@ -32,6 +39,10 @@ export default function StepPhoto({ draft, update, errors }: StepPhotoProps) {
   const objectUrlRef = useRef<string | null>(null);
   // Ignore responses from an upload the user has already replaced or left.
   const requestRef = useRef(0);
+
+  useEffect(() => {
+    onUploadingChange?.(uploading);
+  }, [uploading, onUploadingChange]);
 
   function releaseObjectUrl() {
     if (objectUrlRef.current) {

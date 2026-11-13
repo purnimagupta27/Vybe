@@ -108,7 +108,7 @@ export default function Profile() {
           <span>Back to Discover</span>
         </Link>
         <Link
-          to="/onboarding"
+          to="/profile/edit"
           className="cursor-pointer rounded-full bg-white/10 px-5 py-2 text-sm font-medium text-white/90 transition-colors hover:bg-white/15 hover:text-white"
         >
           Edit details
@@ -221,7 +221,7 @@ export default function Profile() {
           <div className="mt-8 pt-4">
             <div className="flex items-center justify-between mb-3">
               <h2 className="font-heading text-[11px] font-semibold uppercase tracking-[0.2em] text-vybe-gold">
-                Signature Track
+                Favorite Song
               </h2>
             </div>
 

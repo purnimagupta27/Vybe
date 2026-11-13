@@ -1,3 +1,5 @@
+import type { Profile } from "../../lib/api";
+
 export type OnboardingDraft = {
   name: string;
   lastName: string;
@@ -33,6 +35,50 @@ export const emptyDraft: OnboardingDraft = {
   songStory: "",
   photoUrl: null,
 };
+
+/** Trims, drops blanks and de-duplicates singer names case-insensitively. */
+export function normalizeFavSingers(values: string[]): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const value of values) {
+    const trimmed = value.trim();
+    if (!trimmed) continue;
+    const key = trimmed.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(trimmed);
+  }
+  return result;
+}
+
+/**
+ * Builds the editable draft from the profile the server returned. The photo is
+ * only carried over when it is one of ours — a Google avatar is never stored.
+ */
+export function draftFromProfile(profile: Profile): OnboardingDraft {
+  return {
+    name: profile.name,
+    lastName: profile.lastName ?? "",
+    gender: profile.gender ?? "",
+    age: profile.age === null ? "" : String(profile.age),
+    city: profile.city ?? "",
+    about: profile.about ?? "",
+    favSingers: [...profile.favSingers],
+    song: profile.song
+      ? {
+          id: profile.song.providerTrackId,
+          title: profile.song.title,
+          artist: profile.song.artist,
+          artworkUrl: profile.song.artworkUrl,
+          durationSeconds: profile.song.durationSeconds,
+          streamUrl: profile.song.streamUrl,
+          story: profile.song.story,
+        }
+      : null,
+    songStory: profile.song?.story ?? "",
+    photoUrl: profile.image?.startsWith("https://res.cloudinary.com/") ? profile.image : null,
+  };
+}
 
 export function validateBasics(draft: OnboardingDraft): Record<string, string> {
   const errors: Record<string, string> = {};

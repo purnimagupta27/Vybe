@@ -112,6 +112,25 @@ export async function completeProfile(input: CompleteProfileInput): Promise<void
   });
 }
 
+export type EditProfileInput = {
+  name: string;
+  lastName: string;
+  gender: "male" | "female" | "others";
+  age: number;
+  city: string;
+  about: string;
+  favSingers: string[];
+  song: { trackId: string; story: string };
+};
+
+export async function editProfile(input: EditProfileInput): Promise<void> {
+  await request("/api/profile/edit", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+}
+
 export type FeedSong = {
   title: string;
   artist: string;

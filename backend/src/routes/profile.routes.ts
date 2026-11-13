@@ -12,9 +12,18 @@ import {
   completeProfileSchema,
   editProfileSchema,
   type CompleteProfileInput,
+  type EditProfileInput,
 } from "../validations/profile.validation.js";
 
 const profileRouter: Router = Router();
+
+// `editProfileSchema` accepts an explicit `null` to clear a field, but every
+// editable column is NOT NULL and the guard below refuses nulls once the
+// profile is complete. This narrows the validated body to the shape the
+// `user` table can actually store.
+type ProfileUpdates = {
+  [K in Exclude<keyof EditProfileInput, "song" | "email">]?: NonNullable<EditProfileInput[K]>;
+};
 
 profileRouter.get("/view", async (req: Request, res: Response) => {
   try {
@@ -100,9 +109,11 @@ profileRouter.patch("/edit", validate(editProfileSchema), async (req: Request, r
 
     // After validation, req.body only contains the editable fields the user
     // actually sent. Email and other protected fields are rejected by the schema.
-    const updates = req.body;
+    // The song lives in its own table, so it is lifted out before the user row
+    // is updated. `profileUpdates` is what actually maps onto the `user` table.
+    const { song, ...profileUpdates } = req.body as EditProfileInput;
 
-    if (Object.keys(updates).length === 0) {
+    if (Object.keys(req.body).length === 0) {
       return res.status(400).json({
         status: "error",
         message: "No fields provided to update",
@@ -122,7 +133,7 @@ profileRouter.patch("/edit", validate(editProfileSchema), async (req: Request, r
       const requiredKeys = ["name", "lastName", "gender", "age", "city", "about", "favSingers"] as const;
 
       for (const key of requiredKeys) {
-        const value = (updates as Record<string, unknown>)[key];
+        const value = (profileUpdates as Record<string, unknown>)[key];
         const isEmpty =
           value === null ||
           value === "" ||
@@ -137,17 +148,59 @@ profileRouter.patch("/edit", validate(editProfileSchema), async (req: Request, r
       }
     }
 
-    const [updatedUser] = await db
-      .update(user)
-      .set(updates)
-      .where(eq(user.id, currentUser.id))
-      .returning();
+    if (song) {
+      // Re-resolve the track so a song deleted on Audius cannot be saved, the
+      // same rule the complete-profile endpoint applies.
+      const track = await getAudiusTrack(song.trackId);
+      if (!track) {
+        return res.status(400).json({
+          status: "error",
+          message: "That song is no longer available. Please pick another one.",
+        });
+      }
 
-    if (!updatedUser) {
-      return res.status(404).json({
-        status: "error",
-        message: "User not found",
-      });
+      // Retryable by design: song first, then the user row. Neon's HTTP driver
+      // has no transaction to wrap these in.
+      await db
+        .insert(profileSong)
+        .values({
+          userId: currentUser.id,
+          provider: "audius",
+          providerTrackId: track.id,
+          title: track.title,
+          artist: track.artist,
+          artworkUrl: track.artworkUrl,
+          durationSeconds: track.durationSeconds,
+          story: song.story,
+        })
+        .onConflictDoUpdate({
+          target: profileSong.userId,
+          set: {
+            provider: "audius",
+            providerTrackId: track.id,
+            title: track.title,
+            artist: track.artist,
+            artworkUrl: track.artworkUrl,
+            durationSeconds: track.durationSeconds,
+            story: song.story,
+          },
+        });
+    }
+
+    // A song-only edit must not emit an empty `update ... set`.
+    if (Object.keys(profileUpdates).length > 0) {
+      const [updatedUser] = await db
+        .update(user)
+        .set(profileUpdates as ProfileUpdates)
+        .where(eq(user.id, currentUser.id))
+        .returning();
+
+      if (!updatedUser) {
+        return res.status(404).json({
+          status: "error",
+          message: "User not found",
+        });
+      }
     }
 
     return res.status(200).json({

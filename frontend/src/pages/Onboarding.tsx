@@ -4,8 +4,10 @@ import { completeProfile, type CompleteProfileInput } from "../lib/api";
 import { useProfile } from "../lib/profile-context";
 import {
   clearDraft,
+  draftFromProfile,
   emptyDraft,
   loadDraft,
+  normalizeFavSingers,
   saveDraft,
   validateAbout,
   validateBasics,
@@ -24,20 +26,6 @@ const ghostButtonClass =
 
 const primaryButtonClass =
   "cursor-pointer rounded-full bg-vybe-accent px-6 py-2.5 text-sm font-medium text-white transition-opacity duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:opacity-40";
-
-function normalizeFavSingers(values: string[]): string[] {
-  const seen = new Set<string>();
-  const result: string[] = [];
-  for (const value of values) {
-    const trimmed = value.trim();
-    if (!trimmed) continue;
-    const key = trimmed.toLowerCase();
-    if (seen.has(key)) continue;
-    seen.add(key);
-    result.push(trimmed);
-  }
-  return result;
-}
 
 export default function Onboarding() {
   const { profile, loading, error, refresh } = useProfile();
@@ -70,28 +58,7 @@ export default function Onboarding() {
       return;
     }
 
-    setDraft({
-      name: profile.name,
-      lastName: profile.lastName ?? "",
-      gender: profile.gender ?? "",
-      age: profile.age === null ? "" : String(profile.age),
-      city: profile.city ?? "",
-      about: profile.about ?? "",
-      favSingers: [...profile.favSingers],
-      song: profile.song
-        ? {
-            id: profile.song.providerTrackId,
-            title: profile.song.title,
-            artist: profile.song.artist,
-            artworkUrl: profile.song.artworkUrl,
-            durationSeconds: profile.song.durationSeconds,
-            streamUrl: profile.song.streamUrl,
-            story: profile.song.story,
-          }
-        : null,
-      songStory: profile.song?.story ?? "",
-      photoUrl,
-    });
+    setDraft(draftFromProfile(profile));
   }, [profile, profileId]);
 
   function update(patch: Partial<OnboardingDraft>) {
