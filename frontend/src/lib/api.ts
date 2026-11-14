@@ -223,6 +223,32 @@ export async function getPublicProfile(
   return body.data;
 }
 
+/** A person the logged-in user is connected with — the other side of an accepted request. */
+export type Friend = {
+  id: string;
+  name: string;
+  lastName: string | null;
+  image: string | null;
+  gender: "male" | "female" | "others" | null;
+  age: number | null;
+  about: string | null;
+  favSingers: string[];
+  /** When the request was accepted (ISO string). */
+  connectedAt: string;
+};
+
+export type FriendsPage = {
+  count: number;
+  friends: Friend[];
+};
+
+export async function getFriends(signal?: AbortSignal): Promise<FriendsPage> {
+  const body = await request<{ count: number; data: Friend[] }>("/api/user/friends", {
+    signal,
+  });
+  return { count: body.count, friends: body.data };
+}
+
 /** What the receiver can do with a pending request. */
 export type ReviewDecision = "accepted" | "rejected";
 

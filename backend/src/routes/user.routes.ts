@@ -2,7 +2,7 @@ import { Router, type Request, type Response } from "express";
 import db from "../index.js";
 import { connectionRequest } from "../db/connectionRequest-schema.js";
 import { user } from "../db/auth-schema.js";
-import { and, eq } from "drizzle-orm"
+import { and, desc, eq, or } from "drizzle-orm"
 
 const userRouter: Router = Router()
 
@@ -139,6 +139,74 @@ userRouter.get("/connections", async (req: Request, res: Response) => {
       status: "error",
       message:
         "Something went wrong while fetching connections. Please try again.",
+    })
+  }
+})
+
+// GET /api/user/friends
+// The logged-in user's accepted connections, from EITHER direction: rows they
+// sent that were accepted, and rows they received and accepted. One row per
+// pair (unique constraint), so nobody can appear twice.
+// `/connections` above already returns a similar list; this one is what the
+// Friends tab consumes, and it also returns the total in `count`.
+userRouter.get("/friends", async (req: Request, res: Response) => {
+  try {
+    const loggedInUserId = req.user?.id
+
+    if (!loggedInUserId) {
+      return res.status(401).json({ message: "Unauthorized" })
+    }
+
+    const friends = await db
+      .select({
+        id: user.id,
+        name: user.name,
+        lastName: user.lastName,
+        image: user.image,
+        gender: user.gender,
+        age: user.age,
+        about: user.about,
+        favSingers: user.favSingers,
+        // When the request was accepted. updatedAt moves with the status change.
+        connectedAt: connectionRequest.updatedAt,
+      })
+      .from(connectionRequest)
+      // Join the OTHER side of the row, whichever side the viewer is on.
+      .innerJoin(
+        user,
+        or(
+          and(
+            eq(connectionRequest.fromUserId, loggedInUserId),
+            eq(user.id, connectionRequest.toUserId),
+          ),
+          and(
+            eq(connectionRequest.toUserId, loggedInUserId),
+            eq(user.id, connectionRequest.fromUserId),
+          ),
+        ),
+      )
+      .where(eq(connectionRequest.status, "accepted"))
+      .orderBy(desc(connectionRequest.updatedAt))
+
+    const withSingers = friends.map((friend) => ({
+      ...friend,
+      // Same convention as the other endpoints: unset singers are [] not null.
+      favSingers: friend.favSingers ?? [],
+    }))
+
+    return res.status(200).json({
+      status: "success",
+      message: "Friends fetched successfully",
+      count: withSingers.length,
+      data: withSingers,
+    })
+  }
+  catch (error) {
+    console.error("Get friends error:", error)
+    return res.status(500).json({
+      status: "error",
+      message:
+        "Something went wrong while fetching your friends. Please try again.",
     })
   }
 })

@@ -202,6 +202,24 @@ body {
   will-change: transform;
 }
 
+/* ---------- Profile menu ---------- */
+
+@keyframes menu-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.menu-pop {
+  transform-origin: top right;
+  animation: menu-pop 160ms var(--ease-out-strong);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .sleeve-enter,
   .card-land,
@@ -213,5 +231,10 @@ body {
 
   .sleeve-float {
     animation-name: none;
+  }
+
+  .menu-pop {
+    animation-name: gentle-fade;
+    animation-duration: 150ms;
   }
 }

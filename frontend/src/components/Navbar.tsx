@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { AudioLines, Compass, LogOut, User, Users } from "lucide-react";
+import { AudioLines, LogOut, User, Users } from "lucide-react";
 import { authClient, signInWithGoogle } from "../lib/auth-client";
 import { useProfile } from "../lib/profile-context";
 
@@ -83,12 +83,12 @@ export default function Navbar() {
         {user && (
           <Link
             to="/connections"
-            aria-label="Connection requests"
+            aria-label="Connections"
             className="group relative flex size-10 items-center justify-center rounded-full border border-white/25 bg-white/5 text-white/70 transition-all duration-200 hover:border-white/50 hover:bg-white/10 hover:text-white hover:scale-105 focus:outline-none focus:ring-2 focus:ring-vybe-gold/50"
           >
             <Users aria-hidden className="size-[18px]" />
             <span className="pointer-events-none absolute right-0 top-full z-10 mt-2 whitespace-nowrap rounded-lg border border-white/15 bg-[#0e0914]/95 px-2.5 py-1 text-[11px] text-white/80 opacity-0 shadow-xl backdrop-blur-xl transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100">
-              Connection requests
+              Connections
             </span>
           </Link>
         )}
@@ -126,55 +126,55 @@ export default function Navbar() {
             </div>
 
             {dropdownOpen && (
-              <div className="absolute right-0 top-full mt-3 w-60 overflow-hidden rounded-2xl border border-white/15 bg-[#0e0914]/95 p-2 shadow-2xl backdrop-blur-xl animate-in fade-in duration-150">
-                <div className="flex items-center gap-3 px-3 py-2.5">
-                  <div className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/5">
+              <div
+                role="menu"
+                className="menu-pop absolute right-0 top-full mt-3 w-60 overflow-hidden rounded-2xl border border-white/12 bg-white/[0.06] p-1.5 shadow-[0_24px_60px_-24px_rgba(0,0,0,0.9)] backdrop-blur-2xl"
+              >
+                <div className="flex items-center gap-3 px-2 py-2">
+                  <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-vybe-gold/25 bg-white/5">
                     {avatarUrl ? (
                       <img src={avatarUrl} alt="" className="size-full object-cover" />
                     ) : (
-                      <span className="text-xs font-semibold text-vybe-gold">{initial}</span>
+                      <span className="font-heading text-sm font-semibold text-vybe-gold">
+                        {initial}
+                      </span>
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-white/90">
+                    <p className="truncate font-heading text-sm font-semibold text-white/90">
                       {user.name}
                     </p>
-                    <p className="truncate text-xs text-white/45">{user.email}</p>
+                    <p className="mt-0.5 truncate text-[11px] leading-tight text-white/40">
+                      {user.email}
+                    </p>
                   </div>
                 </div>
 
-                <div className="my-1.5 border-t border-white/10" />
+                <div className="mx-1.5 my-1 border-t border-white/[0.07]" />
 
                 <Link
                   to="/profile"
+                  role="menuitem"
                   onClick={() => setDropdownOpen(false)}
-                  className="group flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+                  className="group flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-[13px] text-white/70 transition-colors hover:bg-white/[0.07] hover:text-white"
                 >
-                  <User className="size-4 text-white/50 group-hover:text-vybe-gold" />
+                  <User className="size-4 text-white/40 transition-colors group-hover:text-vybe-gold" />
                   <span>View profile</span>
                 </Link>
 
-                <Link
-                  to="/discover"
-                  onClick={() => setDropdownOpen(false)}
-                  className="group flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-white/80 transition-colors hover:bg-white/10 hover:text-white"
-                >
-                  <Compass className="size-4 text-white/50 group-hover:text-vybe-gold" />
-                  <span>Discover feed</span>
-                </Link>
-
-                <div className="my-1.5 border-t border-white/10" />
+                <div className="mx-1.5 my-1 border-t border-white/[0.07]" />
 
                 <button
                   type="button"
+                  role="menuitem"
                   onClick={handleSignOut}
                   disabled={signingOut}
-                  className="group flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-rose-300 transition-colors hover:bg-rose-500/15 hover:text-rose-200 disabled:cursor-wait disabled:opacity-60"
+                  className="group flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-2.5 py-2 text-[13px] text-rose-300/90 transition-colors hover:bg-rose-500/10 hover:text-rose-200 disabled:cursor-wait disabled:opacity-60"
                 >
                   {signingOut ? (
                     <div className="size-4 animate-spin rounded-full border-2 border-rose-400/20 border-t-rose-400" />
                   ) : (
-                    <LogOut className="size-4 text-rose-400/80 group-hover:text-rose-300" />
+                    <LogOut className="size-4 text-rose-400/70 transition-colors group-hover:text-rose-300" />
                   )}
                   <span>{signingOut ? "Logging out…" : "Log out"}</span>
                 </button>

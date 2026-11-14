@@ -110,14 +110,17 @@ export default function Discover() {
 
   return (
     <main className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-xl flex-col items-center justify-center px-4 py-6 sm:py-10">
-      <header className="mb-10 text-center">
-        <h1 className="font-heading text-xl sm:text-2xl font-semibold tracking-tight text-white/90">
-          Discover
-        </h1>
-        <p className="mt-1 text-xs text-white/50">
-          Swipe right to show interest, left to pass.
-        </p>
-      </header>
+      {/* Only meaningful while a card is on screen; the empty/error states speak for themselves. */}
+      {current && (
+        <header className="mb-10 text-center">
+          <h1 className="font-heading text-xl font-semibold tracking-tight text-white/90 sm:text-2xl">
+            Discover
+          </h1>
+          <p className="mt-1 text-xs text-white/50">
+            Swipe right to show interest, left to pass.
+          </p>
+        </header>
+      )}
 
       {notice && (
         <div className="mb-4 flex w-full max-w-[380px] sm:max-w-[400px] items-start gap-3 rounded-xl border border-rose-400/30 bg-rose-500/10 px-4 py-2.5 text-xs text-rose-100">
